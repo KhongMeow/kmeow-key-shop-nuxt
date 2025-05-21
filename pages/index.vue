@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <NuxtLink to="/categories" class="text-blue-500 hover:underline">Categories</NuxtLink> -->
+    <NuxtLink to="/categories" class="text-blue-500 hover:underline">Categories</NuxtLink>
     <p>Meow</p>
   </div>
 </template>

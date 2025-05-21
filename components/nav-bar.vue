@@ -96,28 +96,23 @@ const categories = ref<{
 const authStore = useAuthStore();
 const menuOpen = ref(false);
 const userPopoverOpen = ref(false);
-const user = ref<{ 
-  fullname: string,
-  username: string,
-  email: string,
-  role: [{
-    id: number,
-    name: string,
-    slug: string,
-    rolePermissions: [{
-      id: number,
-      permission: {
-        id: number,
-        name: string,
-        slug: string,
-      }
-    }]
-  }],
-  balance: [{
-    id: number,
-    amount: number,
-  }],
-} | null>(null);
+type RolePermission = {
+  permission: {
+    slug: string;
+  };
+};
+
+type Role = {
+  rolePermissions: RolePermission[];
+};
+
+type User = {
+  fullname: string;
+  email: string;
+  role: Role | Role[];
+};
+
+const user = ref<User | null>(null);
 
 const hasAccessToDashboard = computed(() => {
   if (!user.value || !user.value.role) {
@@ -154,6 +149,25 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(async () => {
   await getCategories();
   await authStore.getUser();
+  // Map authStore.user to match the expected User type
+  if (authStore.user) {
+    user.value = {
+      fullname: authStore.user.fullname,
+      email: authStore.user.email,
+      // Map role to include empty rolePermissions if not present
+      role: Array.isArray(authStore.user.role)
+        ? authStore.user.role.map(r => ({
+            ...r,
+            rolePermissions: r.rolePermissions ?? []
+          }))
+        : {
+            ...authStore.user.role,
+            rolePermissions: (authStore.user.role as any).rolePermissions ?? []
+          }
+    };
+  } else {
+    user.value = null;
+  }
   document.addEventListener('click', handleClickOutside);
 });
 
