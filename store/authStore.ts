@@ -1,32 +1,6 @@
 import { defineStore } from 'pinia'
-import { useApi } from '~/composables/userApi';
-
-type User = {
-  id: number;
-  fullname: string;
-  username: string;
-  email: string;
-  password: string;
-  role: Role;
-};
-
-type Role = {
-  id: number;
-  name: string;
-  slug: string;
-};
-
-type permission = {
-  id: number;
-  name: string;
-  slug: string;
-};
-
-type rolePermission = {
-  id: number;
-  role_id: number;
-  permission_id: number;
-};
+import { useApi } from '~/composables/useApi';
+import type { User } from '~/types/users';
 
 type Credentials = {
   usernameOrEmail: string;
@@ -37,9 +11,55 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
   const accessToken = ref<string | null>(null);
   const isLoading = ref<boolean>(false);
+  const isUpdating = ref<boolean>(false);
+  const isChanging = ref<boolean>(false);
   const signInError = ref<string | null>(null);
   const signUpError = ref<string | null>(null);
 
+  if (process.client) {
+    const storedToken = localStorage.getItem('access_token');
+    if (storedToken) {
+      accessToken.value = storedToken;
+      getUser();
+    }
+
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      user.value = JSON.parse(userData);
+    }
+  }
+
+  async function checkAuth() {
+    if (process.client) {
+      const hasToken = !!localStorage.getItem('refresh_token');
+      if (hasToken) {
+        return await refreshToken();
+      }
+      if (!user.value) await getUser();
+      return !!user.value;
+    }
+    return false;
+  }
+
+  async function refreshToken() {
+    try {
+      const response = await useApi<{ accessToken: string, refreshToken:string }>('/authentication/refresh-tokens', {
+        method: 'POST',
+        data: {
+          refreshToken: localStorage.getItem('refresh_token'),
+        },
+      });
+      accessToken.value = response.accessToken;
+      localStorage.setItem('access_token', response.accessToken);
+      localStorage.setItem('refresh_token', response.refreshToken);
+      return true;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      // localStorage.removeItem('access_token');
+      // localStorage.removeItem('refresh_token');
+      return false;
+    }
+  }
 
   async function signOut() {
     try {
@@ -54,8 +74,10 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       user.value = null;
       accessToken.value = null;
+      localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      return navigateTo('/auth');
+      localStorage.removeItem('user');
+      return navigateTo('/auth/sign-in');
     }
   }
 
@@ -67,8 +89,12 @@ export const useAuthStore = defineStore('auth', () => {
         method: 'POST',
         data: { usernameOrEmail, password },
       });
+      localStorage.setItem('access_token', signIn.accessToken);
       localStorage.setItem('refresh_token', signIn.refreshToken);
       accessToken.value = signIn.accessToken;
+      
+      await getUser();
+      
       return navigateTo('/');
     } catch (error: any) {
       signInError.value = error?.response?.data?.message || 'Sign-in failed';
@@ -179,20 +205,76 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function getUser() {
     try {
+      isLoading.value = true;
       const response = await useApi<User>('/users/my-profile', {
         method: 'GET',
       });
       user.value = response;
+
+      localStorage.setItem('user', JSON.stringify(response));
     } catch (error) {
       console.error('Error fetching user:', error);
       user.value = null;
+      localStorage.removeItem('user');
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  async function updateUser(id: number, fullname: string, email: string) {
+    try {
+      isUpdating.value = true;
+      const response = await useApi<User>(`/users`, {
+        method: 'PATCH',
+        data: { fullname, email },
+      });
+      if (response) {
+        user.value = response;
+      }
+      if (response) {
+        user.value = response;
+        localStorage.setItem('user', JSON.stringify(response)); // Update localStorage
+      }
+      return response;
+    } catch (error) {
+      console.error('Error fetching user by ID:', error);
+      return null;
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    try {
+      isChanging.value = true;
+      const response = await useApi<User>(`/users/change-password`, {
+        method: 'POST',
+        data: { currentPassword, newPassword },
+      });
+      return response;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return null;
+    } finally {
+      isChanging.value = false;
+    }
+  }
+
+  function checkPermission(permission: string) {
+    if (!user.value || !user.value.role || !user.value.role.rolePermissions) {
+      return false;
+    }
+    return user.value.role.rolePermissions.some(
+      (rolePermission) => rolePermission.permission.slug === permission
+    );
   }
 
   return {
     user,
     accessToken,
     isLoading,
+    isUpdating,
+    isChanging,
     signInError,
     signUpError,
     signIn,
@@ -203,5 +285,10 @@ export const useAuthStore = defineStore('auth', () => {
     sendVerifyCode,
     verificationEmail,
     getUser,
+    checkAuth,
+    refreshToken,
+    updateUser,
+    changePassword,
+    checkPermission,
   };
 });

@@ -31,24 +31,24 @@
           v-model="email"
           :error="errors.email"
         />
-      <InputTextbox
-        label="Password"
-        type="password"
-        id="password"
-        ariaDescribedby="password-helper"
-        placeholder="Enter your password"
-        v-model="password"
-        :error="errors.password"
-      />
-      <InputTextbox
-        label="Confirm Password"
-        type="password"
-        id="confirm-password"
-        ariaDescribedby="confirm-password-helper"
-        placeholder="Enter your password again"
-        v-model="confirmPassword"
-        :error="errors.confirmPassword"
-      />
+        <InputTextbox
+          label="Password"
+          type="password"
+          id="password"
+          ariaDescribedby="password-helper"
+          placeholder="Enter your password"
+          v-model="password"
+          :error="errors.password"
+        />
+        <InputTextbox
+          label="Confirm Password"
+          type="password"
+          id="confirm-password"
+          ariaDescribedby="confirm-password-helper"
+          placeholder="Enter your password again"
+          v-model="confirmPassword"
+          :error="errors.confirmPassword"
+        />
       <div v-if="authStore.signUpError" id="error" class="my-4 bg-gray-200 p-4 rounded-lg text-justify dark:bg-gray-700">
         <p class="text-red-500 text-sm font-medium dark:text-red-400">{{ authStore.signUpError }}</p>
       </div>
