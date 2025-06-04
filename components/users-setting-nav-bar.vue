@@ -4,14 +4,9 @@
       <div class="max-w-[81rem] w-[80%] flex items-center justify-between">
         <div id="left" class="flex items-center">
           <div id="logo" class="px-2 flex items-center">
-            <img @click="$router.push('/dashboard')" src="/assets/kmeowkeyshop_logo.png" alt="logo" class="hidden max-sm:block max-h-[2rem]" />
-            <NuxtLink to="/dashboard" class="block max-sm:hidden dark:text-white font-bold text-2xl text-nowrap">K'meow Key shop</NuxtLink>
+            <img @click="$router.push('/users-setting')" src="/assets/kmeowkeyshop_logo.png" alt="logo" class="hidden max-sm:block max-h-[2rem]" />
+            <NuxtLink to="/users-setting" class="block max-sm:hidden dark:text-white font-bold text-2xl text-nowrap">K'meow Key shop</NuxtLink>
           </div>
-          <!-- <div id="categories" class="px-2 flex max-sm:flex-col items-center gap-4 text-gray-800 dark:text-white font-medium">
-            <NuxtLink v-for="category in categories" :to="`/categories/${category.name}`" class="hover:cursor-pointer hover:text-blue-500 font-bold">
-              {{ category.name }}
-            </NuxtLink>
-          </div> -->
 
           <!-- Navigation Links -->
           <div
@@ -23,47 +18,25 @@
             class="absolute lg:static top-20 left-0 w-full lg:w-auto bg-gray-100 dark:bg-gray-800 lg:bg-transparent"
           >
             <NuxtLink
-              :to="`/dashboard/slides-show`"
+              :to="`/users-setting/roles`"
               @click="closeMenu"
               :class="[
                 'hover:cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 max-lg:hover:bg-gray-300 max-lg:dark:hover:bg-gray-500 font-bold p-2 w-full text-center rounded',
-                $route.path.startsWith(`/dashboard/slides-show`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
+                $route.path.startsWith(`/users-setting/roles`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
               ]"
             >
-              Slides Show
+              Roles
             </NuxtLink>
 
             <NuxtLink
-              :to="`/dashboard/categories`"
+              :to="`/users-setting/role-permissions`"
               @click="closeMenu"
               :class="[
                 'hover:cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 max-lg:hover:bg-gray-300 max-lg:dark:hover:bg-gray-500 font-bold p-2 w-full text-center rounded',
-                $route.path.startsWith(`/dashboard/categories`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
+                $route.path.startsWith(`/users-setting/role-permissions`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
               ]"
             >
-              Categories
-            </NuxtLink>
-
-            <NuxtLink
-              :to="`/dashboard/products`"
-              @click="closeMenu"
-              :class="[
-                'hover:cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 max-lg:hover:bg-gray-300 max-lg:dark:hover:bg-gray-500 font-bold p-2 w-full text-center rounded',
-                $route.path.startsWith(`/dashboard/products`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
-              ]"
-            >
-              Products
-            </NuxtLink>
-
-            <NuxtLink
-              :to="`/dashboard/license-keys`"
-              @click="closeMenu"
-              :class="[
-                'hover:cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 max-lg:hover:bg-gray-300 max-lg:dark:hover:bg-gray-500 font-bold p-2 w-full text-center rounded',
-                $route.path.startsWith(`/dashboard/license-keys`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
-              ]"
-            >
-              License Keys
+              Role Permissions
             </NuxtLink>
           </div>
         </div>

@@ -97,7 +97,6 @@
         @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
       />
     </div>
-  </div>
 
   <!-- Preview Modal -->
   <UModal v-model:open="showPreviewModal" title="Preview" description="This is the preview of the imported data." :ui="{ footer: 'justify-end' }">
@@ -125,6 +124,7 @@
       <UButton label="Submit" color="primary" :loading="isLoading" @click="confirmImport" />
     </template>
   </UModal>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -140,10 +140,8 @@ import { useAuthStore } from '~/store/authStore'
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: ['auth', 'dashboard'],
-  meta: {
-    requiredPermissions: 'list-license-keys'
-  }
+  middleware: ['auth', 'dashboard', 'permission'],
+  requiredPermission: 'list-license-keys'
 });
 
 const authStore = useAuthStore();

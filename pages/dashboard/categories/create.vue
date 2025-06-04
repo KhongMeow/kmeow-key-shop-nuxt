@@ -25,10 +25,8 @@
 
   definePageMeta({
     layout: 'dashboard',
-    middleware: ['auth', 'dashboard'],
-    meta: {
-      requiredPermissions: ['create-category'],
-    },
+    middleware: ['auth', 'dashboard', 'permission'],
+    requiredPermission: 'create-category',
   });
   
   const isDark = ref(false);

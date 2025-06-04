@@ -34,10 +34,8 @@
 
   definePageMeta({
     layout: 'dashboard',
-    middleware: ['auth', 'dashboard'],
-    meta: {
-      requiredPermissions: ['update-slide-show']
-    }
+    middleware: ['auth', 'dashboard', 'permission'],
+    requiredPermission: 'update-slide-show'
   });
 
   const isDark = ref(false);

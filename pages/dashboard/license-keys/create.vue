@@ -34,10 +34,8 @@
 
   definePageMeta({
     layout: 'dashboard',
-    middleware: ['auth', 'dashboard'],
-    meta: {
-      requiredPermissions: ['create-license-key']
-    }
+    middleware: ['auth', 'dashboard', 'permission'],
+    requiredPermission: 'create-license-key',
   });
   
   const isDark = ref(false);

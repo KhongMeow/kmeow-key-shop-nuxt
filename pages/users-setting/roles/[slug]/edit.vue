@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleSubmit" class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
     <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'Edit Categories' }}</h1>
+      <h1 class="text-xl font-bold">{{ 'Edit Roles' }}</h1>
       <ButtonSubmit class="ml-auto" :disabled="isEditing">
         {{ isEditing ? 'Editing...' : 'Edit' }}
       </ButtonSubmit>
@@ -11,7 +11,7 @@
         label="Name"
         type="text"
         id="name"
-        placeholder="Enter category name"
+        placeholder="Enter role name"
         v-model="name"
         :error="errors.name"
       />
@@ -21,12 +21,12 @@
 
 <script lang="ts" setup>
   import Swal from 'sweetalert2';
-  import type { Category } from '~/types/categories';
+  import type { Role } from '~/types/roles';
   
   definePageMeta({
     layout: 'dashboard',
-    middleware: ['auth', 'dashboard', 'permission'],
-    requiredPermission: 'update-category',
+    middleware: ['auth', 'users-setting', 'permission'],
+    requiredPermission: 'update-role',
   });
 
   const isDark = ref(false);
@@ -35,14 +35,14 @@
   const route = useRoute();
   const slug = computed(() => route.params.slug);
 
-  const data = ref<Category | null>(null);
+  const data = ref<Role | null>(null);
   const errors = reactive({
     name: '',
   });
 
   onMounted(async () => {
     isDark.value = document.documentElement.classList.contains('dark');
-    const response = await useApi<Category[]>(`/categories/${slug.value}`, {
+    const response = await useApi<Role>(`/roles/${slug.value}`, {
       method: 'GET',
     });
 
@@ -64,7 +64,7 @@
     if (!errors.name) {
       try {
         isEditing.value = true;
-        const response = await useApi<Category[]>(`/categories/${slug.value}`, {
+        const response = await useApi<Role[]>(`/roles/${slug.value}`, {
           method: 'PATCH',
           data: {
             name: name.value,
@@ -75,19 +75,19 @@
           Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: 'Category updated successfully!',
+            text: 'Role updated successfully!',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',
             color: isDark ? '#fff' : '#1a202c',
           });
-          navigateTo('/dashboard/categories');
+          navigateTo('/users-setting/roles');
         }
       } catch (err: any) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: err.response?.data?.message || 'Failed to update category',
+          text: err.response?.data?.message || 'Failed to update role',
           timer: 2000,
           showConfirmButton: false,
           background: isDark ? '#1a202c' : '#fff',

@@ -1,9 +1,9 @@
 <template>
   <form @submit.prevent="handleSubmit" class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
     <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'Edit Categories' }}</h1>
-      <ButtonSubmit class="ml-auto" :disabled="isEditing">
-        {{ isEditing ? 'Editing...' : 'Edit' }}
+      <h1 class="text-xl font-bold">{{ 'Create Roles' }}</h1>
+      <ButtonSubmit class="ml-auto" :disabled="isCreating">
+        {{ isCreating ? 'Creating...' : 'Create' }}
       </ButtonSubmit>
     </header>
     <div class="flex-1 items-center gap-2 px-4 py-3.5 overflow-x-auto">
@@ -11,7 +11,7 @@
         label="Name"
         type="text"
         id="name"
-        placeholder="Enter category name"
+        placeholder="Enter role name"
         v-model="name"
         :error="errors.name"
       />
@@ -21,35 +21,24 @@
 
 <script lang="ts" setup>
   import Swal from 'sweetalert2';
-  import type { Category } from '~/types/categories';
-  
+  import type { Role } from '~/types/roles';
+
   definePageMeta({
     layout: 'dashboard',
     middleware: ['auth', 'dashboard', 'permission'],
-    requiredPermission: 'update-category',
+    requiredPermission: 'create-role',
   });
-
+  
   const isDark = ref(false);
   const name = ref('');
-  let isEditing = ref(false);
-  const route = useRoute();
-  const slug = computed(() => route.params.slug);
-
-  const data = ref<Category | null>(null);
+  let isCreating = ref(false);
+  
   const errors = reactive({
     name: '',
   });
 
   onMounted(async () => {
     isDark.value = document.documentElement.classList.contains('dark');
-    const response = await useApi<Category[]>(`/categories/${slug.value}`, {
-      method: 'GET',
-    });
-
-    data.value = Array.isArray(response) ? response[0] : response;
-    if (data.value) {
-      name.value = data.value.name;
-    }
   });
 
   const validateName = async (newValue: string) => {
@@ -63,9 +52,9 @@
 
     if (!errors.name) {
       try {
-        isEditing.value = true;
-        const response = await useApi<Category[]>(`/categories/${slug.value}`, {
-          method: 'PATCH',
+        isCreating.value = true;
+        const response = await useApi<Role[]>(`/roles`, {
+          method: 'POST',
           data: {
             name: name.value,
           },
@@ -75,26 +64,26 @@
           Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: 'Category updated successfully!',
+            text: 'Role created successfully!',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',
             color: isDark ? '#fff' : '#1a202c',
           });
-          navigateTo('/dashboard/categories');
+          navigateTo('/users-setting/roles');
         }
       } catch (err: any) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: err.response?.data?.message || 'Failed to update category',
+          text: err.response?.data?.message || 'Failed to create Role',
           timer: 2000,
           showConfirmButton: false,
           background: isDark ? '#1a202c' : '#fff',
           color: isDark ? '#fff' : '#1a202c',
         });
       } finally {
-        isEditing.value = false;
+        isCreating.value = false;
       }
     }
   };

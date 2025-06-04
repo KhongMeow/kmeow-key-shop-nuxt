@@ -64,10 +64,8 @@
 
   definePageMeta({
     layout: 'dashboard',
-    middleware: ['auth', 'dashboard'],
-    meta: {
-      requiredPermissions: ['create-product']
-    }
+    middleware: ['auth', 'dashboard', 'permission'],
+    requiredPermission: 'create-product'
   });
 
   const isDark = ref(false);
