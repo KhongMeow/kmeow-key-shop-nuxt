@@ -175,7 +175,7 @@
             color: isDark.value ? '#fff' : '#1a202c',
           });
         } catch (err: any) {
-          console.error('Failed to delete roles:', err);
+          console.error('Failed to delete role permissions:', err);
           Swal.fire({
             icon: 'error',
             title: 'Error!',

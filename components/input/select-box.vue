@@ -31,7 +31,8 @@
     <!-- Dropdown Menu -->
     <div
       v-show="isOpen"
-      class="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto min-w-full"
+      class="fixed z-50 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600 max-h-60 overflow-y-auto"
+      :style="{ width: dropdownWidth + 'px', }"
     >
       <!-- No results message -->
       <div
@@ -45,9 +46,9 @@
       <div
         v-for="option in filteredOptions"
         :key="option.value"
-        class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center justify-between whitespace-nowrap"
+        class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-between whitespace-nowrap"
         :class="{
-          'bg-blue-50 text-blue-600 dark:bg-blue-900 dark:text-blue-300': option.value === internalValue
+          'text-gray-900 bg-blue-400 dark:text-white dark:bg-blue-700': option.value === internalValue
         }"
         @mousedown.prevent="selectOption(option)"
       >
@@ -69,8 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-// ...existing code...
-import { defineProps, defineEmits, ref, watch, computed, nextTick } from 'vue'
+import { defineProps, defineEmits, ref, watch, computed, nextTick, onMounted } from 'vue'
 
 const props = defineProps({
   modelValue: String,
@@ -89,6 +89,20 @@ const internalValue = ref(props.modelValue)
 const searchTerm = ref('')
 const isOpen = ref(false)
 const searchInput = ref<HTMLInputElement>()
+
+// Dropdown width and position
+const dropdownWidth = ref(0)
+const dropdownLeft = ref(0)
+const dropdownTop = ref(0)
+
+function updateDropdownPosition() {
+  if (searchInput.value) {
+    const rect = searchInput.value.getBoundingClientRect()
+    dropdownWidth.value = rect.width
+    dropdownLeft.value = rect.left + window.scrollX
+    dropdownTop.value = rect.bottom + window.scrollY
+  }
+}
 
 // Computed property to get the selected option
 const selectedOption = computed(() => {
@@ -111,6 +125,13 @@ watch(() => props.modelValue, (val) => {
   updateSearchTerm()
 })
 
+// Watch for dropdown open to update position
+watch(isOpen, (val) => {
+  if (val) {
+    nextTick(updateDropdownPosition)
+  }
+})
+
 // Update search term when value changes
 function updateSearchTerm() {
   if (!isOpen.value) {
@@ -123,6 +144,7 @@ function openDropdown() {
   searchTerm.value = ''
   nextTick(() => {
     searchInput.value?.focus()
+    updateDropdownPosition()
   })
 }
 
@@ -148,4 +170,9 @@ function selectOption(option: { value: string, label: string }) {
 
 // Initialize search term
 updateSearchTerm()
+
+onMounted(() => {
+  updateDropdownPosition()
+  window.addEventListener('resize', updateDropdownPosition)
+})
 </script>

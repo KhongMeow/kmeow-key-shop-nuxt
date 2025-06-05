@@ -56,18 +56,26 @@
 
   onMounted(async () => {
     isDark.value = document.documentElement.classList.contains('dark');
-    const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
-      method: 'GET',
-    });
-
-    data.value = Array.isArray(response) ? response[0] : response;
-    if (data.value) {
-      key.value = data.value.key;
-      product.value = data.value.product?.slug;
-    }
-
-    await getProducts();
+    await [getProducts(), getLicenseKey()];
   });
+
+  async function getLicenseKey() {
+    try {
+      const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
+        method: 'GET',
+      });
+
+      data.value = Array.isArray(response) ? response[0] : response;
+      if (data.value) {
+        key.value = data.value.key;
+        product.value = data.value.product?.slug;
+      }
+    } catch (err: any) {
+      error.value = err?.message || 'Unknown error';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   async function getProducts() {
     try {
