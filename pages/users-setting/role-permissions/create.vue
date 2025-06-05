@@ -6,14 +6,22 @@
         {{ isCreating ? 'Creating...' : 'Create' }}
       </ButtonSubmit>
     </header>
-    <div class="flex-1 items-center gap-2 px-4 py-3.5 overflow-x-auto">
-      <InputTextbox
-        label="Name"
-        type="text"
-        id="name"
-        placeholder="Enter role name"
-        v-model="name"
-        :error="errors.name"
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-3.5">
+      <InputSelectBox
+        label="Role"
+        id="role"
+        v-model="role"
+        :options="roles?.map(role => ({ value: String(role.slug), label: role.name }))"
+        :error="errors.role"
+        :placeholder="'Select a role...'"
+      />
+      <InputSelectBox
+        label="Permission"
+        id="permission"
+        v-model="permission"
+        :options="permissions?.map(permission => ({ value: String(permission.slug), label: permission.name }))"
+        :error="errors.permission"
+        :placeholder="'Select a permission...'"
       />
     </div>
   </form>
@@ -22,41 +30,91 @@
 <script lang="ts" setup>
   import Swal from 'sweetalert2';
   import type { Role } from '~/types/roles';
+  import type { Permission } from '~/types/permissions';
+  import type { RolePermission } from '~/types/role-permissions';
 
   definePageMeta({
-    layout: 'dashboard',
+    layout: 'users-setting',
     middleware: ['auth', 'dashboard', 'permission'],
     requiredPermission: 'create-role',
   });
   
   const isDark = ref(false);
-  const name = ref('');
+  const role = ref<string | undefined>(undefined);
+  const roles = ref<Role[] | undefined>(undefined);
+  const permission = ref<string | undefined>(undefined);
+  const permissions = ref<Permission[] | undefined>(undefined);
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
   let isCreating = ref(false);
   
   const errors = reactive({
-    name: '',
+    role: '',
+    permission: '',
   });
 
   onMounted(async () => {
     isDark.value = document.documentElement.classList.contains('dark');
+    await [getRoles(), getPermissions()];
   });
+  
+  async function getRoles() {
+    try {
+      isLoading.value = true;
+      const response = await useApi<Role[]>(`/roles`, {
+        method: 'GET',
+      });
+      roles.value = response;
+      role.value = '';
+      error.value = null;
+    } catch (err: any) {
+      console.error('Failed to fetch roles:', err);
+      error.value = err?.message || 'Unknown error';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-  const validateName = async (newValue: string) => {
-    errors.name = newValue ? '' : 'Name is required';
+  async function getPermissions() {
+    try {
+      isLoading.value = true;
+      const response = await useApi<Permission[]>(`/permissions`, {
+        method: 'GET',
+      });
+      permissions.value = response;
+      permission.value = '';
+      error.value = null;
+    } catch (err: any) {
+      console.error('Failed to fetch permissions:', err);
+      error.value = err?.message || 'Unknown error';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  const validateRole = async (newValue: string | undefined) => {
+    errors.role = newValue ? '' : 'Role is required';
   };
 
-  watch(name, validateName);
+  const validatePermission = async (newValue: string | undefined) => {
+    errors.permission = newValue ? '' : 'Permission is required';
+  };
+
+  watch(role, validateRole);
+  watch(permission, validatePermission);
 
   const handleSubmit = async () => {
-    validateName(name.value);
+    validateRole(role.value);
+    validatePermission(permission.value);
 
-    if (!errors.name) {
+    if (!errors.role && !errors.permission) {
       try {
         isCreating.value = true;
-        const response = await useApi<Role[]>(`/roles`, {
+        const response = await useApi<RolePermission[]>(`/role-permissions`, {
           method: 'POST',
           data: {
-            name: name.value,
+            roleSlug: role.value,
+            permissionSlug: permission.value,
           },
         });
 
@@ -70,7 +128,7 @@
             background: isDark ? '#1a202c' : '#fff',
             color: isDark ? '#fff' : '#1a202c',
           });
-          navigateTo('/users-setting/roles');
+          navigateTo('/users-setting/role-permissions');
         }
       } catch (err: any) {
         Swal.fire({

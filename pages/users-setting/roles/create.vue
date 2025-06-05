@@ -24,7 +24,7 @@
   import type { Role } from '~/types/roles';
 
   definePageMeta({
-    layout: 'dashboard',
+    layout: 'users-setting',
     middleware: ['auth', 'dashboard', 'permission'],
     requiredPermission: 'create-role',
   });
