@@ -39,7 +39,7 @@
           :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
           color="primary"
           class="mr-2"
-          :to="canCreate ? '/users-setting/roles/create' : undefined"
+          :to="canCreate ? '/users-setting/role-permissions/create' : undefined"
           :disabled="!canCreate"
         />
       </UDropdownMenu>
