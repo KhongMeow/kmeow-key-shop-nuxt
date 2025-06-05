@@ -47,7 +47,6 @@
 
     <UTable
       ref="table"
-      v-model:pagination="pagination"
       :loading="isLoading"
       loading-color="primary"
       loading-animation="carousel"
@@ -55,7 +54,6 @@
       :columns="columns"
       :grouping="['roleId']"
       :grouping-options="grouping_options"
-      :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
       class="min-h-96"
       :ui="{
         root: 'min-w-full',
@@ -100,20 +98,20 @@
       </div>
       
       <UPagination class="flex justify-center"
-        :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-        :total="table?.tableApi?.getFilteredRowModel().rows.length"
-        @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+        :default-page="pagination.pageIndex + 1"
+        :items-per-page="pagination.pageSize"
+        :total="filteredRoles.length"
+        @update:page="(p) => pagination.pageIndex = p - 1"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { h, resolveComponent } from 'vue'
+  import { h, resolveComponent, computed, ref, onMounted } from 'vue'
   import { upperFirst } from 'scule'
   import type { TableColumn } from '@nuxt/ui'
-  import { getGroupedRowModel, getPaginationRowModel, type GroupingOptions } from '@tanstack/vue-table'
+  import { getGroupedRowModel, type GroupingOptions } from '@tanstack/vue-table'
   import Swal from 'sweetalert2'
   import { useAuthStore } from '~/store/authStore'
   import type { Role } from '~/types/roles'
@@ -222,18 +220,31 @@
     }
   }
 
-  const flattenedData = computed(() => {
+  // Filtered roles (if you want to add search/filter logic, do it here)
+  const filteredRoles = computed(() => {
     if (!data.value) return []
-    
+    // Add filter logic here if needed, currently returns all roles
+    return data.value
+  })
+
+  // Paginate only parent roles
+  const paginatedRoles = computed(() => {
+    const roles = filteredRoles.value
+    const start = pagination.value.pageIndex * pagination.value.pageSize
+    const end = start + pagination.value.pageSize
+    return roles.slice(start, end)
+  })
+
+  // Flatten only paginated roles
+  const flattenedData = computed(() => {
+    const roles = paginatedRoles.value
+    if (!roles) return []
     const flattened: any[] = []
-    
-    data.value.forEach(role => {
+    roles.forEach(role => {
       const hasPermissions = role.rolePermissions && Array.isArray(role.rolePermissions) && role.rolePermissions.length > 0
-      
       if (hasPermissions) {
         role.rolePermissions.forEach(rolePermission => {
           if (rolePermission.permission) {
-            
             flattened.push({
               id: `${role.id}-${rolePermission.permission.id}`,
               type: 'permission',
@@ -247,6 +258,7 @@
               rolePermissionId: rolePermission.id,
               rolePermissionSlug: rolePermission.slug,
               isEmpty: false,
+              slug: rolePermission.slug,
             })
           }
         })
@@ -268,7 +280,6 @@
         })
       }
     })
-    
     return flattened
   })
 
@@ -312,9 +323,7 @@
     header: 'Actions',
     cell: ({ row }) => {
       if (row.getIsGrouped()) return ''
-      
       const isPermission = row.getValue('type') === 'permission'
-      
       if (isPermission) {
         // Actions for permissions
         return h('div', { class: 'flex gap-1' }, [
@@ -352,7 +361,6 @@
           })
         ])
       }
-      
       return ''
     }
   }]
