@@ -84,7 +84,7 @@
 
   definePageMeta({
     layout: 'users-setting',
-    middleware: ['auth', 'users-setting'],
+    middleware: ['auth', 'users-setting', 'permission'],
     requiredPermission: 'list-roles',
   });
 
@@ -144,7 +144,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: err?.message || 'Unknown error',
+            text: err?.response?.data?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',
