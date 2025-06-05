@@ -58,7 +58,7 @@
       :ui="{
         root: 'min-w-full',
         td: 'empty:p-0',
-        th: 'w-auto'
+        th: 'w-[25%]'
       }"
     >
       <template #title-cell="{ row }">
@@ -93,8 +93,7 @@
 
     <div class="border-t border-default pt-2">
       <div class="px-4 text-sm text-muted">
-        {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-        {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+        {{ paginatedRoles.length }} of {{ filteredRoles.length }} row(s) selected.
       </div>
       
       <UPagination class="flex justify-center"
