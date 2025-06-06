@@ -33,7 +33,7 @@
           class="ml-auto"
           aria-label="Columns select dropdown"
         />
-        <UButton
+        <!-- <UButton
           label="Create"
           :title="canCreate ? 'Create' : 'Unauthorized'"
           :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
@@ -41,7 +41,7 @@
           class="mr-2"
           :to="canCreate ? '/users-setting/users/create' : undefined"
           :disabled="!canCreate"
-        />
+        /> -->
       </UDropdownMenu>
     </div>
 
@@ -151,7 +151,7 @@
     });
   }
 
-  function confirmChangeRole() {
+  async function confirmChangeRole() {
     try {
       if (!selectedUser.value || !selectedRole.value) {
         Swal.fire({
@@ -168,12 +168,20 @@
 
       isChangingRole.value = true;
 
-      useApi(`/users/change-role/${selectedUser.value.username}`, {
-        method: 'POST',
-        data: {
-          newRoleSlug: selectedRole.value,
-        },
-      }).then(() => {
+      try {
+        await useApi(`/users/change-role/${selectedUser.value.username}`, {
+          method: 'POST',
+          data: {
+            newRoleSlug: selectedRole.value,
+          },
+        });
+
+        if (selectedUser.value) {
+          await useApi(`/authentication/sign-out/${selectedUser.value.username}`, {
+            method: 'POST',
+          });
+        }
+
         Swal.fire({
           icon: 'success',
           title: 'Role Changed!',
@@ -183,8 +191,9 @@
           background: isDark.value ? '#1a202c' : '#fff',
           color: isDark.value ? '#fff' : '#1a202c',
         });
-        getUsers(); // Refresh the user list
-      }).catch(err => {
+
+        await getUsers();
+      } catch (err: any) {
         console.error('Failed to change role:', err);
         Swal.fire({
           icon: 'error',
@@ -195,9 +204,9 @@
           background: isDark.value ? '#1a202c' : '#fff',
           color: isDark.value ? '#fff' : '#1a202c',
         });
-      }).finally(() => {
+      } finally {
         isChangingRole.value = false;
-      });
+      }
     } catch (err: any) {
       console.error('Failed to change role:', err);
       Swal.fire({

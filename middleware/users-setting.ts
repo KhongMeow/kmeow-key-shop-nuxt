@@ -6,12 +6,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const authStore = useAuthStore();
 
-  // If user is not loaded, try to load from token
-  if (!authStore.user) {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      await authStore.getUser();
-    }
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    await authStore.getUser();
   }
 
   if (!authStore.user?.role.rolePermissions.some((rolePermission) => rolePermission.permission.slug === 'access-users-setting')) {
