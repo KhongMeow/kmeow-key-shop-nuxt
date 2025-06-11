@@ -95,7 +95,7 @@
                   color="primary"
                   variant="solid"
                   :disabled="!carts?.length"
-                  @click="carts?.length ? null : $event.preventDefault()"
+                  @click="if (!carts?.length) { $event.preventDefault(); } else { cartPopoverOpen = false; }"
                 >
                   {{ 'Checkout' }}
                 </UButton>
@@ -145,6 +145,16 @@
                 >
                   Dashboard
                 </NuxtLink>
+                <NuxtLink 
+                  v-if="hasAccessToUsersSetting"
+                  to="/users-setting"
+                  class="block text-gray-800 dark:text-gray-200 font-medium p-2 my-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                  active-class="bg-gray-100 dark:bg-gray-500 text-blue-600 dark:text-blue-400"
+                  exact
+                  @click="closeUserPopover"
+                >
+                  Users Setting
+                </NuxtLink>
                 <hr class="my-2 border-gray-300 dark:border-gray-600" />
                 <button
                   @click="signOut"
@@ -180,9 +190,10 @@ import { useCartStore } from '~/store/cartStore';
 import { useApi } from '~/composables/useApi';
 import { useGetImageUrl } from '~/composables/getImageUrl';
 import type { Category } from '~/types/categories';
-import type { RolePermission } from '~/types/role-permissions';
 import type { CartItem } from '~/types/cart-items';
+import Swal from 'sweetalert2';
 
+const isDark = ref(false);
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const menuOpen = ref(false);
@@ -197,19 +208,12 @@ const user = computed(() => {
 });
 
 const hasAccessToDashboard = computed(() => {
-  if (!user.value || !user.value.role) {
-    console.log('No user or role, returning false');
-    return false;
-  }
+  const hasPermission = authStore.checkPermission('access-dashboard');
+  return hasPermission;
+});
 
-  const roles = Array.isArray(user.value.role) ? user.value.role : [user.value.role];
-  
-  const hasPermission = roles.some(role =>
-    Array.isArray(role.rolePermissions) &&
-    role.rolePermissions.some((rolePermission: RolePermission) => rolePermission.permission.slug === 'access-dashboard')
-  );
-
-  // console.log('hasAccessToDashboard:', hasPermission, roles);
+const hasAccessToUsersSetting = computed(() => {
+  const hasPermission = authStore.checkPermission('access-users-setting');
   return hasPermission;
 });
 
@@ -256,10 +260,42 @@ const handleClickOutside = (event: MouseEvent) => {
 const changeItemQuantity = async (item: CartItem, val: string | number) => {
   let quantity = parseInt(val as string, 10);
   if (isNaN(quantity)) quantity = 1;
-  quantity = Math.floor(quantity); // Ensure integer
+  quantity = Math.floor(quantity);
+
+  // Ensure quantity does not exceed stock
+  if (quantity > item.product.stock) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Quantity exceeds stock',
+      text: `Maximum available: ${item.product.stock}`,
+      confirmButtonText: 'OK',
+      background: isDark ? '#1a202c' : '#fff',
+      color: isDark ? '#fff' : '#1a202c',
+    });
+    quantity = item.product.stock;
+  }
+  if (quantity < 0) {
+    quantity = 0;
+  }
+
   await cartStore.updateCartItem(item.id, quantity);
   carts.value = await cartStore.getAllItems();
 };
+
+watch(
+  () => carts.value?.map(item => item.quntity),
+  async (newQuantities, oldQuantities) => {
+    if (!oldQuantities) return;
+    newQuantities?.forEach(async (qty, idx) => {
+      if (qty !== oldQuantities[idx]) {
+        const item = carts.value?.[idx];
+        if (item) {
+          await changeItemQuantity(item, qty);
+        }
+      }
+    });
+  }
+);
 
 watch(
   () => cartStore.cartItems,
@@ -270,20 +306,9 @@ watch(
 );
 
 onMounted(async () => {
+  isDark.value = document.documentElement.classList.contains('dark');
   await getCategories();
   carts.value = await cartStore.getAllItems() as CartItem[];
-  await authStore.checkAuth();
-  
-  // Wait for token to be available before trying to get the user
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    authStore.accessToken = token; // Ensure the store has it too
-    try {
-      await authStore.getUser();
-    } catch (error) {
-      console.error('Error fetching user in navbar:', error);
-    }
-  }
 
   document.addEventListener('click', handleClickOutside);
 });

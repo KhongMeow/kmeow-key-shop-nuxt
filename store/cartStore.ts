@@ -87,6 +87,33 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  async function placeOrder(email: string) {
+    isLoading.value = true;
+    try {
+      const items = await getAllItems();
+      if (items.length === 0) {
+        throw new Error('Cart is empty');
+      }
+      const response = await useApi<Order>('/orders', {
+        method: 'POST',
+        data: { 
+          email,
+          orderItems: items.map(item => ({
+            productSlug: item.product.slug,
+            quantity: item.quntity
+          }))
+        }
+      });
+      order.value = response;
+      return response;
+    } catch (error) {
+      console.error('Error placing order:', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return { 
     cartItems,
     order,
@@ -95,5 +122,6 @@ export const useCartStore = defineStore('cart', () => {
     getAllItems,
     updateCartItem,
     removeFromCart,
+    placeOrder
   };
 })
