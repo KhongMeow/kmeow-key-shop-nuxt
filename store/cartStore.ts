@@ -17,19 +17,19 @@ export const useCartStore = defineStore('cart', () => {
     });
   }
 
-  async function addToCart(productSlug: string, quntity: number) {
+  async function addToCart(productSlug: string, quantity: number) {
     isLoading.value = true;
     try {
       // Check if item already exists in cart
       const existingItem = cartItems.value.find(item => item.productSlug === productSlug);
       if (existingItem) {
-        existingItem.quntity += quntity;
+        existingItem.quantity += quantity;
       } else {
         // Generate a unique id for the cart item
         const newItem: OrderItem = { 
           id: Date.now(),
           productSlug, 
-          quntity 
+          quantity 
         };
         cartItems.value.push(newItem);
       }
@@ -50,7 +50,7 @@ export const useCartStore = defineStore('cart', () => {
       try {
         const product = await useApi<Product>(`/products/${item.productSlug}`, { method: 'GET' });
         if (!product) return null;
-        return { id: item.id, product, quntity: item.quntity };
+        return { id: item.id, product, quantity: item.quantity };
       } catch (error) {
         console.error(`Error fetching product ${item.productSlug}:`, error);
         return null;
@@ -71,7 +71,7 @@ export const useCartStore = defineStore('cart', () => {
     }
     const idx = cartItems.value.findIndex(item => item.id === id);
     if (idx !== -1) {
-      cartItems.value[idx].quntity = Math.floor(newQuantity); // Ensure integer
+      cartItems.value[idx].quantity = Math.floor(newQuantity); // Ensure integer
       if (process.client) {
         const plainCartItems = JSON.parse(JSON.stringify(cartItems.value));
         await set('cartItems', plainCartItems);
@@ -100,7 +100,7 @@ export const useCartStore = defineStore('cart', () => {
           email,
           orderItems: items.map(item => ({
             productSlug: item.product.slug,
-            quantity: item.quntity
+            quantity: item.quantity
           }))
         }
       });

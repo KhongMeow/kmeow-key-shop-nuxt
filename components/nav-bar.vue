@@ -66,7 +66,7 @@
                         <p class="text-gray-600 dark:text-gray-400 text-sm text-nowrap">$ {{ item.product.price }}</p>
                       </div>
                       <InputTextbox
-                        :model-value="String(item.quntity)"
+                        :model-value="String(item.quantity)"
                         type="number"
                         min="0"
                         step="1"
@@ -85,7 +85,7 @@
                 <div class="my-4 flex justify-between">
                   <p class="text-gray-800 dark:text-white font-bold text-lg">{{ 'Total' }}</p>
                   <p class="text-gray-600 dark:text-gray-400 font-bold text-lg">
-                    $ {{ carts?.reduce((total, item) => total + (item.quntity * item.product.price), 0).toFixed(2) }}
+                    $ {{ carts?.reduce((total, item) => total + (item.quantity * item.product.price), 0).toFixed(2) }}
                   </p>
                 </div>
                 <hr>
@@ -283,7 +283,7 @@ const changeItemQuantity = async (item: CartItem, val: string | number) => {
 };
 
 watch(
-  () => carts.value?.map(item => item.quntity),
+  () => carts.value?.map(item => item.quantity),
   async (newQuantities, oldQuantities) => {
     if (!oldQuantities) return;
     newQuantities?.forEach(async (qty, idx) => {

@@ -37,14 +37,14 @@
                 <p class="truncate text-gray-800 dark:text-white font-medium">{{ item.product.name }}</p>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">$ {{ item.product.price }}</p>
               </div>
-              <p class="text-gray-700 dark:text-gray-300 font-semibold">x{{ item.quntity }}</p>
+              <p class="text-gray-700 dark:text-gray-300 font-semibold">x{{ item.quantity }}</p>
             </div>
           </div>
         </div>
         <div class="mt-6 flex justify-between items-center border-t pt-4 border-gray-200 dark:border-gray-700">
           <p class="text-gray-800 dark:text-white font-bold text-lg">Total</p>
           <p class="text-gray-600 dark:text-gray-400 font-bold text-lg">
-            $ {{ carts?.reduce((total, item) => total + (item.quntity * item.product.price), 0).toFixed(2) }}
+            $ {{ carts?.reduce((total, item) => total + (item.quantity * item.product.price), 0).toFixed(2) }}
           </p>
         </div>
         <form @submit.prevent="placeOrder">
