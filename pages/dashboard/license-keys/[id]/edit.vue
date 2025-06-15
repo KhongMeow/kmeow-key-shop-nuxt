@@ -38,7 +38,6 @@
     requiredPermission: 'update-license-key'
   });
 
-  const isDark = ref(false);
   const key = ref('');
   const product = ref<string | undefined>(undefined);
   const products = ref<Product[] | undefined>(undefined);
@@ -55,7 +54,6 @@
   });
 
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     await [getProducts(), getLicenseKey()];
   });
 
@@ -125,8 +123,7 @@
             text: 'License Key updated successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/license-keys');
         }
@@ -137,8 +134,7 @@
           text: err.response?.data?.message || 'Failed to update license key',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isEditing.value = false;

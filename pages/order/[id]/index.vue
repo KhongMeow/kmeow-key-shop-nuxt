@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto py-6 sm:py-8 lg:py-12">
       <!-- Header with back button -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-        <button @click="$router.back()" class="group p-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105 self-start">
+        <button @click="$router.back()" class="flex group p-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105 self-start">
           <Icon name="heroicons:arrow-left" class="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
         </button>
         <div>
@@ -78,16 +78,99 @@
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+              
+          <!-- Payment Timeout Warning -->
+          <div
+            v-if="order?.status === 'Waiting Payment'"
+            class="mt-4 flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 dark:from-yellow-900/30 dark:via-yellow-900/10 dark:to-yellow-900/30 rounded-xl border-2 border-yellow-300 dark:border-yellow-700 shadow-lg animate-fadeInUp"
+          >
+            <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-200 dark:bg-yellow-800 border-4 border-yellow-300 dark:border-yellow-700 shadow">
+              <Icon name="heroicons:exclamation-triangle" class="w-7 h-7 text-yellow-700 dark:text-yellow-200" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <p class="text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100">
+                  Payment expires in
+                </p>
+                <span
+                  class="inline-block px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 font-mono font-bold text-base tracking-widest border border-yellow-300 dark:border-yellow-700"
+                >
+                  {{ getTimeRemaining() }}
+                </span>
+              </div>
+              <div class="mt-2 w-full h-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-500 dark:to-yellow-400 transition-all duration-1000"
+                  :style="{ width: getTimePercentLeft + '%' }"
+                ></div>
+              </div>
+              <p class="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
+                Please complete your payment before the timer runs out to avoid automatic cancellation.
+              </p>
+            </div>
+          </div>
+        </div>
 
-              <!-- Payment Timeout Warning -->
-              <div v-if="order?.status === 'Waiting Payment' && isPaymentExpiringSoon()" class="flex items-start gap-2 sm:gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs sm:text-sm font-medium text-yellow-800 dark:text-yellow-200">Payment expires in:</p>
-                  <p class="text-xs text-yellow-600 dark:text-yellow-400">{{ getTimeRemaining() }}</p>
-                </div>
+        <!-- Payment Confirmation Section (only show for Waiting Payment status) -->
+        <div v-if="order?.status === 'Waiting Payment'" class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-200/50 dark:border-gray-700/50">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full mb-4">
+              <Icon name="heroicons:exclamation-triangle" class="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">Payment Confirmation Required</h2>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Please confirm when you have completed your payment</p>
+          </div>
+
+          <!-- Payment Details -->
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Payment Information</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Order Total:</span>
+                <span class="font-bold text-gray-900 dark:text-white">${{ calculateTotal().toFixed(2) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Order ID:</span>
+                <span class="font-mono text-gray-900 dark:text-white">#{{ order?.id }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Payment Deadline:</span>
+                <span class="text-gray-900 dark:text-white">{{ order?.paymentDeadline ? formatDate(order?.paymentDeadline) : '-' }}</span>
               </div>
             </div>
+          </div>
+
+          <!-- Confirmation Checkbox -->
+          <div class="mb-6">
+            <label class="flex items-start gap-3">
+              <input
+                v-model="confirmationChecked"
+                type="checkbox"
+                class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              >
+              <div class="text-sm">
+                <span class="text-gray-700 dark:text-gray-300">
+                  I confirm that I have completed the payment of 
+                  <strong class="text-gray-900 dark:text-white">${{ calculateTotal().toFixed(2) }}</strong> 
+                  for this order and understand that false confirmation may result in order cancellation.
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              @click="confirmPayment"
+              :disabled="!canConfirmPayment || isConfirming"
+              class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            >
+              <Icon v-if="isConfirming" name="heroicons:arrow-path" class="animate-spin w-5 h-5 mr-2" />
+              <Icon v-else name="heroicons:check-circle" class="w-5 h-5 mr-2" />
+              {{ isConfirming ? 'Confirming...' : 'Confirm Payment' }}
+            </button>
           </div>
         </div>
 
@@ -141,13 +224,13 @@
                     <Icon v-else-if="step.current" :name="step.icon" class="w-4 h-4 lg:w-5 lg:h-5" />
                     <span v-else class="text-xs lg:text-sm">{{ index + 1 }}</span>
                   </div>
-                  <span class="mt-2 text-xs lg:text-sm text-center text-gray-600 dark:text-gray-400 max-w-24 lg:max-w-32 leading-tight">{{ step.name }}</span>
+                  <span class="mt-4 text-xs lg:text-sm text-center text-gray-600 dark:text-gray-400 max-w-24 lg:max-w-32 leading-tight text-nowrap">{{ step.name }}</span>
                   <span v-if="step.timestamp" class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
                     {{ step.timestamp }}
                   </span>
                 </div>
               </div>
-              
+
               <!-- Progress Line -->
               <div class="absolute top-5 lg:top-6 left-5 lg:left-6 right-5 lg:right-6 h-1 bg-gray-200 dark:bg-gray-700 rounded-full -z-0">
                 <div 
@@ -221,6 +304,7 @@
 </template>
 
 <script lang="ts" setup>
+import Swal from 'sweetalert2'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGetImageUrl } from '~/composables/getImageUrl'
@@ -236,14 +320,22 @@ interface OrderStep {
 }
 
 const route = useRoute()
-const id = route.params.id as string
+const orderId = route.params.id as string
 const order = ref<Order | undefined>(undefined)
 const isLoading = ref(false)
+const isConfirming = ref(false)
+const confirmationChecked = ref(false)
+const now = ref(new Date())
+let timer: ReturnType<typeof setInterval> | null = null
 
-onMounted(async () => {
+const canConfirmPayment = computed(() => {
+  return confirmationChecked.value && !isConfirming.value
+})
+
+async function getOrder() {
   try {
     isLoading.value = true
-    const response = await useApi<Order>(`/orders/${id}`, {
+    const response = await useApi<Order>(`/orders/${orderId}`, {
       method: 'GET',
     })
     order.value = response
@@ -254,7 +346,59 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+onMounted(async () => {
+  await getOrder()
+  
+  timer = setInterval(() => {
+    now.value = new Date()
+  }, 1000)
 })
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
+
+async function confirmPayment() {
+  if (!canConfirmPayment.value) return
+  
+  try {
+    isConfirming.value = true
+    
+    const response = await useApi<{ status: number; message: string }>(`/orders/confirm-payment`, {
+      method: 'POST',
+      data: { orderId },
+    })
+    
+    // Show success message
+    Swal.fire({
+      icon: 'success',
+      title: 'Payment Confirmed',
+      text: `${response?.message || 'Your payment has been confirmed successfully.'}`,
+      showConfirmButton: false,
+      timer: 2000,
+      ...getSwalTheme(),
+    })
+    
+    await getOrder()
+    if (timer) clearInterval(timer)
+    confirmationChecked.value = false
+    
+  } catch (error: any) {
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.response?.data?.message || 'An error occurred while confirming payment.',
+      ...getSwalTheme(),
+      showConfirmButton: false,
+      timer: 2000,
+    })
+  } finally {
+    isConfirming.value = false
+  }
+}
 
 function getOrderSteps(): OrderStep[] {
   const status = order.value?.status ?? ''
@@ -271,11 +415,11 @@ function getOrderSteps(): OrderStep[] {
     {
       name: (() => {
         switch (status) {
-          case 'Waiting Payment': return 'Awaiting Payment'
-          case 'Paid': return 'Payment Complete'
-          case 'Cancelled': return 'Payment Cancelled'
-          case 'Delivered': return 'Payment Complete'
-          case 'Failed to Deliver': return 'Payment Complete'
+          case 'Waiting Payment': return 'Waiting Payment'
+          case 'Paid': return 'Paid'
+          case 'Cancelled': return 'Cancelled'
+          case 'Delivered': return 'Paid'
+          case 'Failed to Deliver': return 'Paid'
           default: return 'Payment'
         }
       })(),
@@ -284,8 +428,12 @@ function getOrderSteps(): OrderStep[] {
       failed: status === 'Cancelled',
       icon: status === 'Paid' ? 'heroicons:check-circle' : 'heroicons:credit-card',
       timestamp: (() => {
-        if (status === 'Paid' && order.value?.updatedAt) {
-          return formatDate(order.value.updatedAt)
+        // Show paidAt for Paid, Delivered, or Failed to Deliver
+        if (
+          ['Paid', 'Delivered', 'Failed to Deliver'].includes(status) &&
+          order.value?.paidAt
+        ) {
+          return formatDate(order.value.paidAt)
         }
         if (status === 'Waiting Payment' && order.value?.createdAt) {
           return formatDate(order.value.createdAt)
@@ -326,7 +474,7 @@ function getStepStatusClass(step: OrderStep, index: number): string {
   }
   if (step.current) {
     const status = order.value?.status ?? ''
-    if (step.name === 'Payment Complete' && status === 'Paid') {
+    if (step.name === 'Paid' && status === 'Paid') {
       return 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-500 text-white shadow-lg'
     }
     return 'bg-gradient-to-br from-blue-500 to-purple-600 border-blue-500 text-white shadow-lg animate-pulse'
@@ -392,31 +540,34 @@ function getStatusIcon(status: string): string {
   }
 }
 
-function isPaymentExpiringSoon(): boolean {
-  if (!order.value?.createdAt) return false
-  
-  const createdAt = new Date(order.value.createdAt)
-  const expiryTime = new Date(createdAt.getTime() + (24 * 60 * 60 * 1000))
-  const now = new Date()
-  const timeRemaining = expiryTime.getTime() - now.getTime()
-  
-  return timeRemaining > 0 && timeRemaining < (2 * 60 * 60 * 1000)
-}
+watch(getTimeRemaining, async (val) => {
+  if (val === 'Expired') {
+    await getOrder()
+  }
+})
+
+const getTimePercentLeft = computed(() => {
+  if (!order.value?.paymentDeadline || !order.value?.createdAt) return 0
+  const total = new Date(order.value.paymentDeadline).getTime() - new Date(order.value.createdAt).getTime()
+  const left = new Date(order.value.paymentDeadline).getTime() - now.value.getTime()
+  if (total <= 0) return 0
+  const percent = (left / total) * 100
+  return Math.max(0, Math.min(100, percent))
+})
 
 function getTimeRemaining(): string {
   if (!order.value?.createdAt) return ''
   
-  const createdAt = new Date(order.value.createdAt)
-  const expiryTime = new Date(createdAt.getTime() + (24 * 60 * 60 * 1000))
-  const now = new Date()
-  const timeRemaining = expiryTime.getTime() - now.getTime()
+  const expiryTime = new Date(order.value.paymentDeadline)
+  const timeRemaining = expiryTime.getTime() - now.value.getTime()
   
   if (timeRemaining <= 0) return 'Expired'
   
-  const hours = Math.floor(timeRemaining / (1000 * 60 * 60))
-  const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60))
+  const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60)
+  const seconds = Math.floor((timeRemaining / 1000) % 60)
   
-  return `${hours}h ${minutes}m`
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${pad(minutes)}m : ${pad(seconds)}s`
 }
 
 function calculateTotal(): number {

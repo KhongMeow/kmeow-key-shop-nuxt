@@ -36,15 +36,10 @@
     middleware: ['auth', 'dashboard', 'permission'],
     requiredPermission: 'create-slide-show',
   });
-  
-  const isDark = ref(false);
+
   const title = ref('');
   const slideImage = ref<File | undefined>(undefined);
   let isCreating = ref(false);
-
-  onMounted(() => {
-    isDark.value = document.documentElement.classList.contains('dark');
-  });
   
   const errors = reactive({
     title: '',
@@ -87,8 +82,7 @@
             text: 'Slide show created successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/slides-show');
         }
@@ -99,8 +93,7 @@
           text: err.response?.data?.message || 'Failed to create slide show',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isCreating.value = false;

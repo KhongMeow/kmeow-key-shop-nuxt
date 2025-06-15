@@ -6,6 +6,7 @@ export interface Order {
   orderItems: OrderItem[];
   status: 'Order Created' | 'Waiting Payment' | 'Paid' | 'Delivered' | 'Cancelled' | 'Failed to Deliver';
   createdAt: Date;
+  paymentDeadline: Date;
   paidAt?: Date;
   deliveredAt?: Date;
   cancelledAt?: Date;

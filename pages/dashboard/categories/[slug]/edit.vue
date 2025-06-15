@@ -29,7 +29,6 @@
     requiredPermission: 'update-category',
   });
 
-  const isDark = ref(false);
   const name = ref('');
   let isEditing = ref(false);
   const route = useRoute();
@@ -41,7 +40,6 @@
   });
 
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     const response = await useApi<Category[]>(`/categories/${slug.value}`, {
       method: 'GET',
     });
@@ -78,8 +76,7 @@
             text: 'Category updated successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/categories');
         }
@@ -90,8 +87,7 @@
           text: err.response?.data?.message || 'Failed to update category',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isEditing.value = false;

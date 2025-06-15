@@ -68,7 +68,6 @@
     requiredPermission: 'create-product'
   });
 
-  const isDark = ref(false);
   const name = ref('');
   const category = ref<string | undefined>(undefined);
   const detail = ref<string | undefined>(undefined);
@@ -81,7 +80,6 @@
   const error = ref<string | null>(null);
 
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     await getCategories();
   })
 
@@ -174,8 +172,7 @@
             text: 'Product created successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/products');
         }
@@ -186,8 +183,7 @@
           text: err.response?.data?.message || 'Failed to create product',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isCreating.value = false;

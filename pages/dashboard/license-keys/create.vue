@@ -38,7 +38,6 @@
     requiredPermission: 'create-license-key',
   });
   
-  const isDark = ref(false);
   const key = ref('');
   const product = ref<string | undefined>(undefined);
   const products = ref<Product[] | undefined>(undefined);
@@ -52,7 +51,6 @@
   });
 
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     await getProducts();
   });
 
@@ -105,8 +103,7 @@
             text: 'License Key created successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/license-keys');
         }
@@ -117,8 +114,7 @@
           text: err.response?.data?.message || 'Failed to create License Key',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isCreating.value = false;

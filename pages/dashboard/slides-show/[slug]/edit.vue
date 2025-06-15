@@ -38,7 +38,6 @@
     requiredPermission: 'update-slide-show'
   });
 
-  const isDark = ref(false);
   const title = ref('');
   const slideImage = ref<File | undefined>(undefined);
   let isEditing = ref(false);
@@ -53,7 +52,6 @@
   });
 
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     const response = await useApi<SlideShow[]>(`/slides-show/${slug.value}`, {
       method: 'GET',
     });
@@ -97,8 +95,7 @@
             text: 'Slide show updated successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/slides-show');
         }
@@ -109,8 +106,7 @@
           text: err.response?.data?.message || 'Failed to update slide show',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isEditing.value = false;

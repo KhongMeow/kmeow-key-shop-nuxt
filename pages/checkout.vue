@@ -67,16 +67,17 @@
   import Swal from 'sweetalert2';
 
   const cartStore = useCartStore()
-
-  const isDark = ref(false);
   const carts = ref<CartItem[] | undefined>(undefined);
   const email = ref<string>('');
   const errors = reactive({
     email: '',
   });
 
+  definePageMeta({
+    middleware: ['auth'],
+  })
+
   onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
     carts.value = await cartStore.getAllItems();
   });
 
@@ -97,13 +98,14 @@
           text: 'Your cart is empty!',
           timer: 3000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       }
 
       try {
         const response = await cartStore.placeOrder(email.value);
+        await cartStore.clearCart();
+        carts.value = [];
         navigateTo('/order/' + response.id);
         Swal.fire({
           icon: 'success',
@@ -111,8 +113,7 @@
           text: 'Your order has been placed successfully!',
           showConfirmButton: false,
           timer: 3000,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } catch (error: any) {
         Swal.fire({
@@ -121,8 +122,7 @@
           text: error?.response?.data?.message || 'Unknown error',
           showConfirmButton: false,
           timer: 3000,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       }
     }

@@ -29,16 +29,11 @@
     requiredPermission: 'create-category',
   });
   
-  const isDark = ref(false);
   const name = ref('');
   let isCreating = ref(false);
   
   const errors = reactive({
     name: '',
-  });
-
-  onMounted(async () => {
-    isDark.value = document.documentElement.classList.contains('dark');
   });
 
   const validateName = async (newValue: string) => {
@@ -67,8 +62,7 @@
             text: 'Category created successfully!',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
           navigateTo('/dashboard/categories');
         }
@@ -79,8 +73,7 @@
           text: err.response?.data?.message || 'Failed to create Category',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isCreating.value = false;

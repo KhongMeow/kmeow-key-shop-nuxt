@@ -145,7 +145,6 @@ definePageMeta({
 });
 
 const authStore = useAuthStore();
-const isDark = ref(false);
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
@@ -191,7 +190,14 @@ async function handleFileUpload(event: Event) {
     });
 
     if (!keys.length || !productSlugs.length || keys.length !== productSlugs.length) {
-      Swal.fire('Error', 'Excel must have columns: key, productSlug', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Excel must have columns: key, productSlug',
+        timer: 2000,
+        showConfirmButton: false,
+        ...getSwalTheme(),
+      });
       return;
     }
 
@@ -207,8 +213,7 @@ async function handleFileUpload(event: Event) {
       text: err?.message ?? 'Failed to import',
       timer: 2000,
       showConfirmButton: false,
-      background: isDark ? '#1a202c' : '#fff',
-      color: isDark ? '#fff' : '#1a202c',
+      ...getSwalTheme(),
     });
   } finally {
     // Reset file input so user can re-upload the same file if needed
@@ -232,8 +237,7 @@ async function confirmImport() {
       text: 'License Key imported successfully!',
       timer: 2000,
       showConfirmButton: false,
-      background: isDark ? '#1a202c' : '#fff',
-      color: isDark ? '#fff' : '#1a202c',
+      ...getSwalTheme(),
     });
     await getLicenseKeys();
   } catch (err: any) {
@@ -243,8 +247,7 @@ async function confirmImport() {
       text: err?.response?.data?.message ?? 'Failed to import',
       timer: 2000,
       showConfirmButton: false,
-      background: isDark ? '#1a202c' : '#fff',
-      color: isDark ? '#fff' : '#1a202c',
+      ...getSwalTheme(),
     });
   } finally {
     isLoading.value = false;
@@ -271,7 +274,6 @@ async function getProducts() {
 
 onMounted(async () => {
   await [getLicenseKeys(), getProducts()];
-  isDark.value = document.documentElement.classList.contains('dark');
 });
 
 const pagination = ref({
@@ -288,8 +290,7 @@ function deleteRow(id: string) {
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText: 'Yes, delete it!',
-    background: isDark ? '#1a202c' : '#fff',
-    color: isDark ? '#fff' : '#1a202c',
+    ...getSwalTheme(),
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
@@ -304,8 +305,7 @@ function deleteRow(id: string) {
           text: 'Your license key has been deleted.',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } catch (err: any) {
         console.error('Failed to delete license key:', err);
@@ -315,8 +315,7 @@ function deleteRow(id: string) {
           text: err?.message || 'Unknown error',
           timer: 2000,
           showConfirmButton: false,
-          background: isDark ? '#1a202c' : '#fff',
-          color: isDark ? '#fff' : '#1a202c',
+          ...getSwalTheme(),
         });
       } finally {
         isLoading.value = false;
@@ -330,8 +329,7 @@ function deleteRow(id: string) {
       text: 'Failed to confirm deletion',
       timer: 2000,
       showConfirmButton: false,
-      background: isDark ? '#1a202c' : '#fff',
-      color: isDark ? '#fff' : '#1a202c',
+      ...getSwalTheme(),
     });
   });
 }

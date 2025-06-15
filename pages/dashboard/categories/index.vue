@@ -88,7 +88,6 @@
   });
 
   const authStore = useAuthStore();
-  const isDark = ref(false);
   const UButton = resolveComponent('UButton')
   const UDropdownMenu = resolveComponent('UDropdownMenu')
 
@@ -102,7 +101,6 @@
 
   onMounted(async () => {
     await getCategories();
-    isDark.value = document.documentElement.classList.contains('dark');
   });
 
   const pagination = ref({
@@ -119,8 +117,7 @@
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
-      background: isDark ? '#1a202c' : '#fff',
-      color: isDark ? '#fff' : '#1a202c',
+      ...getSwalTheme(),
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -135,8 +132,7 @@
             text: 'Your categories has been deleted.',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
         } catch (err: any) {
           console.error('Failed to delete categories:', err);
@@ -146,8 +142,7 @@
             text: err?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
-            background: isDark ? '#1a202c' : '#fff',
-            color: isDark ? '#fff' : '#1a202c',
+            ...getSwalTheme(),
           });
         } finally {
           isLoading.value = false;
@@ -161,8 +156,7 @@
         text: 'Failed to confirm deletion',
         timer: 2000,
         showConfirmButton: false,
-        background: isDark ? '#1a202c' : '#fff',
-        color: isDark ? '#fff' : '#1a202c',
+        ...getSwalTheme(),
       });
     });
   }

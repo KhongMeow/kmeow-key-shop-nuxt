@@ -87,6 +87,13 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  async function clearCart() {
+    cartItems.value = [];
+    if (process.client) {
+      await set('cartItems', []);
+    }
+  }
+
   async function placeOrder(email: string) {
     isLoading.value = true;
     try {
@@ -122,6 +129,7 @@ export const useCartStore = defineStore('cart', () => {
     getAllItems,
     updateCartItem,
     removeFromCart,
-    placeOrder
+    placeOrder,
+    clearCart,
   };
 })
