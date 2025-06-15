@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi';
-import type { Order } from '~/types/orders';
 import type { User } from '~/types/users';
 
 type Credentials = {
@@ -10,7 +9,6 @@ type Credentials = {
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
-  const userOrders = ref<Order[]>([]);
   const accessToken = ref<string | null>(null);
   const isLoading = ref<boolean>(false);
   const isUpdating = ref<boolean>(false);
@@ -223,7 +221,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateUser(fullname: string, email: string) {
+  async function updateUser(id: number, fullname: string, email: string) {
     try {
       isUpdating.value = true;
       const response = await useApi<User>(`/users`, {
@@ -262,28 +260,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function checkPermission(permission: string) {
+  function checkPermission(permission: string) {
     if (!user.value || !user.value.role || !user.value.role.rolePermissions) {
       return false;
     }
     return user.value.role.rolePermissions.some(
       (rolePermission) => rolePermission.permission.slug === permission
     );
-  }
-
-  async function getUserOrders() {
-    try {
-      isLoading.value = true;
-      const response = await useApi<Order[]>('/orders/my-orders', {
-        method: 'GET',
-      });
-      userOrders.value = response;
-    } catch (error) {
-      console.error('Error fetching user orders:', error);
-      userOrders.value = [];
-    } finally {
-      isLoading.value = false;
-    }
   }
 
   return {
@@ -307,6 +290,5 @@ export const useAuthStore = defineStore('auth', () => {
     updateUser,
     changePassword,
     checkPermission,
-    getUserOrders,
   };
 });
