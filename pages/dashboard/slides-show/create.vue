@@ -64,7 +64,7 @@
     if (!errors.title && !errors.slideImage) {
       try {
         isCreating.value = true;
-        const response = await useApi<SlideShow[]>(`/slides-show`, {
+        const response = await useApi<SlideShow>(`/slides-show`, {
           method: 'POST',
           data: {
             title: title.value,

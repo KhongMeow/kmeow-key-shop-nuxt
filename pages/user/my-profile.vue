@@ -1,120 +1,88 @@
 <template>
   <div class="px-2 sm:px-4 md:px-8 mx-auto">
-    <h1 class="text-xl md:text-2xl font-bold py-4 text-center md:text-left">My Profile</h1>
+    <h1 class="text-xl md:text-2xl font-bold py-4">My Profile</h1>
     <div class="flex flex-row gap-6">
       <!-- Sidebar -->
       <aside
-        class="group flex flex-col items-center md:items-stretch w-14 hover:w-44 md:w-64 md:hover:w-64 transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-2 md:p-4 h-fit"
+        class="group flex flex-col items-center md:items-stretch transition-all duration-200 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-2 md:p-4 h-fit"
       >
         <nav class="flex flex-col gap-2 w-full">
           <button
             class="flex items-center gap-3 py-2 px-2 md:px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition text-left w-full"
-            :class="activeSection === 'profile' ? 'bg-gray-200 dark:bg-gray-700' : ''"
-            @click="activeSection = 'profile'"
+            :class="activeSection === 'update-profile' ? 'bg-gray-200 dark:bg-gray-700' : ''"
+            @click="activeSection = 'update-profile'"
+            title="Profile Information"
           >
             <!-- Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <Icon name="mdi:account-circle-outline" class="h-6 w-6 flex-shrink-0" />
             <!-- Text, hidden by default, shown on hover or md+ -->
-            <span class="hidden group-hover:inline md:inline transition-all">Profile Information</span>
+            <span class="hidden md:inline transition-all">Profile Information</span>
           </button>
           <button
             class="flex items-center gap-3 py-2 px-2 md:px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition text-left w-full"
-            :class="activeSection === 'password' ? 'bg-gray-200 dark:bg-gray-700' : ''"
-            @click="activeSection = 'password'"
+            :class="activeSection === 'my-orders' ? 'bg-gray-200 dark:bg-gray-700' : ''"
+            @click="activeSection = 'my-orders'"
+            title="My Orders"
           >
             <!-- Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.104 0 2-.896 2-2V7a2 2 0 10-4 0v2c0 1.104.896 2 2 2zm6 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6a2 2 0 012-2h8a2 2 0 012 2z" />
-            </svg>
-            <span class="hidden group-hover:inline md:inline transition-all">Update Password</span>
+            <Icon name="mdi:cart-outline" class="h-6 w-6 flex-shrink-0" />
+            <!-- Text, hidden by default, shown on hover or md+ -->
+            <span class="hidden md:inline transition-all">My Orders</span>
+          </button>
+          <button
+            class="flex items-center gap-3 py-2 px-2 md:px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition text-left w-full"
+            :class="activeSection === 'change-password' ? 'bg-gray-200 dark:bg-gray-700' : ''"
+            @click="activeSection = 'change-password'"
+            title="Change Password"
+          >
+            <!-- Icon -->
+            <Icon name="mdi:lock-outline" class="h-6 w-6 flex-shrink-0" />
+            <span class="hidden md:inline transition-all">Change Password</span>
           </button>
         </nav>
       </aside>
       <!-- Main Content -->
       <main class="flex-1">
+        <!-- Update Profile Section -->
         <div
-          v-if="activeSection === 'profile'"
+          v-if="activeSection === 'update-profile'"
           class="w-full bg-gray-100 dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 md:p-8 mb-6"
         >
-          <form @submit.prevent="handleUpdateInfo" class="w-full">
-            <header class="mb-6 md:mb-8">
-              <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100">Profile Information</h2>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Update your account's profile information and email address.</p>
-            </header>
-            <div v-if="profile" class="space-y-4">
-              <InputTextbox
-                label="Full Name"
-                type="text"
-                id="full-name"
-                ariaDescribedby="full-name-helper"
-                placeholder="Enter your full name"
-                v-model="profile.fullname"
-              />
-              <InputTextbox
-                label="Email"
-                type="email"
-                id="email"
-                ariaDescribedby="email-helper"
-                placeholder="Enter your email"
-                class="w-full"
-                v-model="profile.email"
-              />
-            </div>
-            <div class="mt-6 flex justify-end">
-              <ButtonSubmit :disabled="authStore.isUpdating" type="submit" class="w-full sm:w-auto">
-                <span v-if="authStore.isUpdating">Saving...</span>
-                <span v-else>Save</span>
-              </ButtonSubmit>
-            </div>
-          </form>
+          <UserUpdateProfile
+            :profile="profile"
+            :errors="errors"
+            :isUpdating="authStore.isUpdating"
+            @submit="handleUpdateInfo"
+          />
         </div>
+
+        <!-- My Orders Section -->
         <div
-          v-if="activeSection === 'password'"
+          v-if="activeSection === 'my-orders'"
           class="w-full bg-gray-100 dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 md:p-8"
         >
-          <form @submit.prevent="handleChangePassword" class="w-full">
-            <header class="mb-6 md:mb-8">
-              <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100">Update Password</h2>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ensure your account is using a long, random password to stay secure.</p>
-            </header>
-            <div v-if="profile" class="space-y-4">
-              <InputTextbox
-                label="Current Password"
-                type="password"
-                id="current-password"
-                ariaDescribedby="current-password-helper"
-                placeholder="Enter your current password"
-                v-model="changePasswordData.currentPassword"
-                :error="errors.currentPassword"
-              />
-              <InputTextbox
-                label="New Password"
-                type="password"
-                id="new-password"
-                ariaDescribedby="new-password-helper"
-                placeholder="Enter new password"
-                v-model="changePasswordData.newPassword"
-                :error="errors.newPassword"
-              />
-              <InputTextbox
-                label="Confirm Password"
-                type="password"
-                id="confirm-password"
-                ariaDescribedby="confirm-password-helper"
-                placeholder="Enter confirm password"
-                v-model="changePasswordData.confirmPassword"
-                :error="errors.confirmPassword"
-              />
-            </div>
-            <div class="mt-6 flex justify-end">
-              <ButtonSubmit :disabled="authStore.isChanging" type="submit" class="w-full sm:w-auto">
-                <span v-if="authStore.isChanging">Saving...</span>
-                <span v-else>Save</span>
-              </ButtonSubmit>
-            </div>
-          </form>
+          <UserMyOrders
+            v-if="activeSection === 'my-orders'"
+            :profile="profile"
+            :error="error"
+            :isLoading="authStore.isLoading"
+            @fetchOrders="authStore.getUserOrders"
+          />
+        </div>
+
+        <!-- Change Password Section -->
+        <div
+          v-if="activeSection === 'change-password'"
+          class="w-full bg-gray-100 dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 md:p-8"
+        >
+          <UserChangePassword
+            v-if="activeSection === 'change-password'"
+            :profile="profile"
+            :changePasswordData="changePasswordData"
+            :errors="errors"
+            :isChanging="authStore.isChanging"
+            @submit="handleChangePassword"
+          />
         </div>
       </main>
     </div>
@@ -122,28 +90,12 @@
 </template>
 
 <script lang="ts" setup>
+  import Swal from 'sweetalert2';
   import { useAuthStore } from '~/store/authStore';
+  import type { User } from '~/types/users';
 
   const authStore = useAuthStore();
-  const activeSection = ref<'profile' | 'password'>('profile');
-
-  type RolePermission = {
-    permission: {
-      slug: string;
-    };
-  };
-
-  type Role = {
-    rolePermissions: RolePermission[];
-  };
-
-  type User = {
-    id: number;
-    fullname: string;
-    username: string;
-    email: string;
-    role: Role | Role[];
-  };
+  const activeSection = ref<'my-orders' | 'update-profile' | 'change-password'>('update-profile');
 
   type ChangePassword = {
     currentPassword: string;
@@ -158,10 +110,44 @@
   });
 
   const errors = reactive({
+    fullname: '',
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+
+  const validateFullname = async (newValue: string) => {
+    if (!newValue) {
+      errors.fullname = 'Full Name is required';
+    } else {
+      errors.fullname = '';
+    }
+  };
+
+  const validateEmail = async (newValue: string) => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!newValue) {
+      errors.email = 'Email is required';
+    } else {
+      if (!emailPattern.test(newValue)) {
+        errors.email = 'Email must be a valid email address';
+      } else {
+        try {
+          const response = await useApi<{ message?: string }>(
+            '/users/is-exist-email-auth',
+            {
+              method: 'POST',
+              data: { email: newValue }
+            }
+          );
+          errors.email = response && response.message ? response.message : '';
+        } catch (error) {
+          errors.email = '';
+        }
+      }
+    }
+  };
 
   const validateNewPassword = async (newValue: string) => {
     if (!newValue) {
@@ -193,12 +179,14 @@
     title: 'My Profile',
   })
 
+  watch(() => profile.value?.fullname ?? '', validateFullname);
+  watch(() => profile.value?.email ?? '', validateEmail);
+
   const handleUpdateInfo = async () => {
     if (!profile.value) return;
 
     try {
       const updateResult = await authStore.updateUser(
-        profile.value.id,
         profile.value.fullname,
         profile.value.email
       );
@@ -230,13 +218,28 @@
         changePasswordData.value.newPassword
       );
 
+      Swal.fire({
+        icon: 'success',
+        title: 'Password Changed Successfully',
+        text: 'Your password has been changed successfully.',
+        showConfirmButton: false,
+        timer: 2000,
+        ...getSwalTheme(),
+      })
+
       // Clear the fields after successful change
       changePasswordData.value.currentPassword = '';
       changePasswordData.value.newPassword = '';
       changePasswordData.value.confirmPassword = '';
       error.value = null;
     } catch (err: any) {
-      console.error('Failed to change password:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Changing Password',
+        text: err?.message || 'An error occurred while changing your password.',
+        showConfirmButton: true,
+        ...getSwalTheme(),
+      });
       error.value = err?.message || 'Unknown error';
     }
   }

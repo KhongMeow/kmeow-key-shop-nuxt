@@ -339,7 +339,6 @@ async function getOrder() {
       method: 'GET',
     })
     order.value = response
-    console.log('Order fetched successfully:', order.value)
   } catch (error) {
     console.error(error)
     order.value = undefined
