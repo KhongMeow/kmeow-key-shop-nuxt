@@ -43,7 +43,8 @@
 import { useAuthStore } from '~/store/authStore';
 
 definePageMeta({
-  layout: false
+  layout: false,
+  middleware: 'authenticated'
 });
 
 const usernameOrEmail = ref('');
