@@ -54,7 +54,7 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="min-h-96 [&_th:not(:first-child)]:w-[15%]"
+      class="min-h-96 [&_th:not(:first-child)]:w-[15%] max-lg:[&_th]:hidden max-lg:[&_td]:flex max-lg:[&_tr]:border-b max-lg:[&_tr]:border-gray-500"
     />
 
     <div class="border-t border-default pt-2">
@@ -179,11 +179,11 @@ async function getProducts() {
   }
 }
 
-const columns: TableColumn<Product>[] = [{
+const columns: TableColumn<Product>[] = [
+  {
     accessorKey: 'id',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -196,12 +196,15 @@ const columns: TableColumn<Product>[] = [{
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
     },
-    cell: ({ row }) => `${row.index + 1}`,
-  }, {
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "No.:"),
+      h('span', {}, `${row.index + 1}`)
+    ]),
+  },
+  {
     accessorKey: 'name',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-      
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -215,12 +218,15 @@ const columns: TableColumn<Product>[] = [{
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
     },
-    cell: ({ row }) => row.getValue('name'),
-  }, {
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Name:"),
+      h('span', {}, row.getValue('name'))
+    ]),
+  },
+  {
     accessorKey: 'category',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-      
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -236,13 +242,16 @@ const columns: TableColumn<Product>[] = [{
     },
     cell: ({ row }) => {
       const category = row.getValue('category') as Category | null | undefined;
-      return category?.name || 'N/A';
+      return h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Category:"),
+        h('span', {}, category?.name || 'N/A')
+      ])
     },
-  }, {
+  },
+  {
     accessorKey: 'detail',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-      
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -256,12 +265,15 @@ const columns: TableColumn<Product>[] = [{
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
     },
-    cell: ({ row }) => h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('detail') || 'N/A'),
-  }, {
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Detail:"),
+      h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('detail') || 'N/A')
+    ]),
+  },
+  {
     accessorKey: 'description',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-      
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -275,12 +287,15 @@ const columns: TableColumn<Product>[] = [{
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
     },
-    cell: ({ row }) => h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('description') || 'N/A'),
-  }, {
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Description:"),
+      h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('description') || 'N/A')
+    ]),
+  },
+  {
     accessorKey: 'price',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
-      
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -294,51 +309,63 @@ const columns: TableColumn<Product>[] = [{
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
     },
-    cell: ({ row }) => row.getValue('price') !== undefined ? ('$' + row.getValue('price')) : 'N/A',
-  }, {
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Price:"),
+      h('span', {}, row.getValue('price') !== undefined ? ('$' + row.getValue('price')) : 'N/A')
+    ]),
+  },
+  {
     accessorKey: 'image',
     header: 'Image',
-    cell: ({ row }) => h('img', { src: useGetImageUrl(row.getValue('image')), alt: row.getValue('name'), class: 'w-16 h-16 object-cover' })
-  }, {
-  accessorKey: 'actions',
-  header: 'Actions',
-  cell: ({ row }) => {
-    return h('div', { class: 'flex' }, [
-      h(UButton, {
-        class: [
-          'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
-          canEdit
-            ? 'hover:bg-blue-700'
-            : 'cursor-not-allowed'
-        ].join(' '),
-        title: canEdit ? 'Edit' : 'Unauthorized',
-        color: canEdit ? undefined : 'none',
-        variant: canEdit ? undefined : 'none',
-        icon: canEdit ? 'tabler:edit' : 'tabler:lock',
-        disabled: !canEdit,
-        onClick: canEdit ? () => navigateTo(`/dashboard/products/${row.original.slug}/edit`) : undefined,
-      }, {
-        default: () => h('span', { class: 'hidden sm:inline' }, 'Edit')
-      }),
-      h(UButton, {
-        class: [
-          'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
-          canDelete
-            ? 'hover:bg-red-700'
-            : 'cursor-not-allowed'
-        ].join(' '),
-        title: canDelete ? 'Delete' : 'Unauthorized',
-        color: canDelete ? undefined : 'none',
-        variant: canDelete ? undefined : 'none',
-        icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
-        disabled: !canDelete,
-        onClick: canDelete ? () => deleteRow(row.original.slug) : undefined,
-      }, {
-        default: () => h('span', { class: 'hidden sm:inline' }, 'Delete')
-      })
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Image:"),
+      h('img', { src: useGetImageUrl(row.getValue('image')), alt: row.getValue('name'), class: 'w-16 h-16 object-cover' })
     ])
+  },
+  {
+    accessorKey: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      return h('div', { class: 'flex w-full items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Actions:"),
+        h('div', { class: 'flex items-center gap-2' }, [
+          h(UButton, {
+            class: [
+              'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
+              canEdit
+                ? 'hover:bg-blue-700'
+                : 'cursor-not-allowed'
+            ].join(' '),
+            title: canEdit ? 'Edit' : 'Unauthorized',
+            color: canEdit ? undefined : 'none',
+            variant: canEdit ? undefined : 'none',
+            icon: canEdit ? 'tabler:edit' : 'tabler:lock',
+            disabled: !canEdit,
+            onClick: canEdit ? () => navigateTo(`/dashboard/products/${row.original.slug}/edit`) : undefined,
+          }, {
+            default: () => h('span', { class: 'max-lg:hidden' }, 'Edit')
+          }),
+          h(UButton, {
+            class: [
+              'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
+              canDelete
+                ? 'hover:bg-red-700'
+                : 'cursor-not-allowed'
+            ].join(' '),
+            title: canDelete ? 'Delete' : 'Unauthorized',
+            color: canDelete ? undefined : 'none',
+            variant: canDelete ? undefined : 'none',
+            icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
+            disabled: !canDelete,
+            onClick: canDelete ? () => deleteRow(row.original.slug) : undefined,
+          }, {
+            default: () => h('span', { class: 'max-lg:hidden' }, 'Delete')
+          })
+        ]),
+      ])
+    }
   }
-}]
+]
 
 const table = useTemplateRef('table')
 </script>

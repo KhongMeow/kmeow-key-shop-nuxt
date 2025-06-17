@@ -3,20 +3,20 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'License Keys' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-md:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <USelectMenu
         placeholder="Filter by products"
         :items="[{ label: 'All', value: 'All' }, ...(products?.map(product => ({
           label: product.name,
           value: product.slug,
         })) || [])]"
-        class="w-48"
+        class="w-48 max-md:w-full"
         @update:model-value="table?.tableApi?.getColumn('product')?.setFilterValue($event)"
       />
       <USelectMenu
         placeholder="Filter by status"
         :items="items"
-        class="w-48"
+        class="w-48 max-md:w-full"
         @update:model-value="table?.tableApi?.getColumn('status')?.setFilterValue($event)"
       />
 
@@ -34,41 +34,43 @@
         }))"
         :content="{ align: 'end' }"
       >
-        <UButton
-          label="Columns"
-          color="neutral"
-          variant="outline"
-          trailing-icon="i-lucide-chevron-down"
-          class="ml-auto"
-          aria-label="Columns select dropdown"
-        />
-        <UButton
-          label="Create"
-          :title="canCreate ? 'Create' : 'Unauthorized'"
-          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-          color="primary"
-          class="mr-2"
-          :to="canCreate ? '/dashboard/license-keys/create' : undefined"
-          :disabled="!canCreate"
-        />
-        <UButton
-          label="Import"
-          :title="canCreate ? 'Import' : 'Unauthorized'"
-          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-          color="primary"
-          leading-icon="tabler:file-import"
-          class="mr-2"
-          @click="triggerFileInput"
-          :disabled="!canCreate"
-        />
-        <input
-          ref="fileInput"
-          type="file"
-          accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          class="hidden"
-          @change="handleFileUpload"
-          :disabled="!canCreate"
-        />
+        <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+          <UButton
+            label="Columns"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-chevron-down"
+            class="ml-auto"
+            aria-label="Columns select dropdown"
+          />
+          <div class="flex ml-auto gap-2">
+            <UButton
+              label="Create"
+              :title="canCreate ? 'Create' : 'Unauthorized'"
+              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+              color="primary"
+              :to="canCreate ? '/dashboard/license-keys/create' : undefined"
+              :disabled="!canCreate"
+            />
+            <UButton
+              label="Import"
+              :title="canCreate ? 'Import' : 'Unauthorized'"
+              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+              color="primary"
+              leading-icon="tabler:file-import"
+              @click="triggerFileInput"
+              :disabled="!canCreate"
+            />
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              class="hidden"
+              @change="handleFileUpload"
+              :disabled="!canCreate"
+            />
+          </div>
+        </div>
       </UDropdownMenu>
     </div>
 
@@ -81,7 +83,7 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="min-h-96 [&_th:not(:first-child)]:w-[25%]"
+      class="min-h-96 [&_th:not(:first-child)]:w-[25%] max-md:[&_th]:hidden max-md:[&_td]:flex max-md:[&_tr]:border-b max-md:[&_tr]:border-gray-500"
     />
 
     <div class="border-t border-default pt-2">
@@ -350,133 +352,165 @@ async function getLicenseKeys() {
   }
 }
 
-const columns: TableColumn<LicenseKey>[] = [{
-  accessorKey: 'id',
-  header: ({ column }) => {
-    const isSorted = column.getIsSorted()
-
-    return h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      icon: isSorted
-        ? isSorted === 'asc'
-          ? 'i-lucide-arrow-up-narrow-wide'
-          : 'i-lucide-arrow-down-wide-narrow'
-        : 'i-lucide-arrow-up-down',
-      class: '-mx-2.5',
-      onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-    })
+const columns: TableColumn<LicenseKey>[] = [
+  {
+    accessorKey: 'id',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'No.',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : 'i-lucide-arrow-down-wide-narrow'
+          : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-md:block' }, "No.:"),
+      h('span', {}, `${row.index + 1}`)
+    ]),
   },
-  cell: ({ row }) => `${row.index + 1}`,
-}, {
-  accessorKey: 'product',
-  header: ({ column }) => {
-    const isSorted = column.getIsSorted()
-    
-    return h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      label: 'Product',
-      icon: isSorted
-        ? isSorted === 'asc'
-          ? 'i-lucide-arrow-up-narrow-wide'
-          : 'i-lucide-arrow-down-wide-narrow'
-        : 'i-lucide-arrow-up-down',
-      class: '-mx-2.5',
-      onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-    })
+  {
+    accessorKey: 'product',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Product',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : 'i-lucide-arrow-down-wide-narrow'
+          : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => {
+      const product = row.getValue('product') as Product | null | undefined;
+      return h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Product:"),
+        h('span', {}, product?.name || 'N/A')
+      ])
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue.value || filterValue.value === 'All') return true
+      const product = row.getValue(columnId) as Product | null | undefined
+      return product?.slug === filterValue.value
+    },
   },
-  cell: ({ row }) => {
-    const product = row.getValue('product') as Product | null | undefined;
-    return product?.name || 'N/A';
+  {
+    accessorKey: 'key',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Key',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : 'i-lucide-arrow-down-wide-narrow'
+          : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+      h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Key:"),
+      h('span', {}, row.getValue('key'))
+    ]),
   },
-  filterFn: (row, columnId, filterValue) => {
-    if (!filterValue.value || filterValue.value === 'All') return true
-    const product = row.getValue(columnId) as Product | null | undefined
-    return product?.slug === filterValue.value
+  {
+    accessorKey: 'status',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Status',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : 'i-lucide-arrow-down-wide-narrow'
+          : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => {
+      const status = row.getValue('status')
+      // Add index signature to satisfy TypeScript
+      const statusMap: Record<string, string> = {
+        'Active': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-600',
+        'Waiting Payment': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-600',
+        'Cancelled': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600',
+        'Paid': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-600',
+        'Delivered': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-600'
+      }
+      const statusClass = statusMap[String(status)] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+      return h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Status:"),
+        h('span', {
+          class: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${statusClass}`
+        }, String(status))
+      ])
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue === 'All') return true
+      return row.getValue(columnId) === filterValue
+    },
   },
-}, {
-  accessorKey: 'key',
-  header: ({ column }) => {
-    const isSorted = column.getIsSorted()
-    
-    return h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      label: 'Key',
-      icon: isSorted
-        ? isSorted === 'asc'
-          ? 'i-lucide-arrow-up-narrow-wide'
-          : 'i-lucide-arrow-down-wide-narrow'
-        : 'i-lucide-arrow-up-down',
-      class: '-mx-2.5',
-      onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-    })
-  },
-  cell: ({ row }) => row.getValue('key'),
-}, {
-  accessorKey: 'status',
-  header: ({ column }) => {
-    const isSorted = column.getIsSorted()
-    
-    return h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      label: 'Status',
-      icon: isSorted
-        ? isSorted === 'asc'
-          ? 'i-lucide-arrow-up-narrow-wide'
-          : 'i-lucide-arrow-down-wide-narrow'
-        : 'i-lucide-arrow-up-down',
-      class: '-mx-2.5',
-      onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-    })
-  },
-  cell: ({ row }) => row.getValue('status'),
-  filterFn: (row, columnId, filterValue) => {
-    if (!filterValue || filterValue === 'All') return true
-    return row.getValue(columnId) === filterValue
-  },
-}, {
-  accessorKey: 'actions',
-  header: 'Actions',
-  cell: ({ row }) => {
-      return h('div', { class: 'flex' }, [
-        h(UButton, {
-          class: [
-            'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
-            canEdit
-              ? 'hover:bg-blue-700'
-              : 'cursor-not-allowed'
-          ].join(' '),
-          title: canEdit ? 'Edit' : 'Unauthorized',
-          color: canEdit ? undefined : 'none',
-          variant: canEdit ? undefined : 'none',
-          icon: canEdit ? 'tabler:edit' : 'tabler:lock',
-          disabled: !canEdit,
-          onClick: canEdit ? () => navigateTo(`/dashboard/license-keys/${row.original.id}/edit`) : undefined,
-        }, {
-          default: () => h('span', { class: 'hidden sm:inline' }, 'Edit')
-        }),
-        h(UButton, {
-          class: [
-            'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
-            canDelete
-              ? 'hover:bg-red-700'
-              : 'cursor-not-allowed'
-          ].join(' '),
-          title: canDelete ? 'Delete' : 'Unauthorized',
-          color: canDelete ? undefined : 'none',
-          variant: canDelete ? undefined : 'none',
-          icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
-          disabled: !canDelete,
-          onClick: canDelete ? () => deleteRow(row.original.id) : undefined,
-        }, {
-          default: () => h('span', { class: 'hidden sm:inline' }, 'Delete')
-        })
+  {
+    accessorKey: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      return h('div', { class: 'flex w-full items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Status:"),
+        h('div', { class: 'flex items-center gap-2' }, [
+          h(UButton, {
+            class: [
+              'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white cursor-pointer',
+              canEdit
+                ? 'hover:bg-blue-700'
+                : 'cursor-not-allowed'
+            ].join(' '),
+            title: canEdit ? 'Edit' : 'Unauthorized',
+            color: canEdit ? undefined : 'none',
+            variant: canEdit ? undefined : 'none',
+            icon: canEdit ? 'tabler:edit' : 'tabler:lock',
+            disabled: !canEdit,
+            onClick: canEdit ? () => navigateTo(`/dashboard/license-keys/${row.original.id}/edit`) : undefined,
+          }, {
+            default: () => h('span', { class: 'max-lg:hidden' }, 'Edit')
+          }),
+          h(UButton, {
+            class: [
+              'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white cursor-pointer',
+              canDelete
+                ? 'hover:bg-red-700'
+                : 'cursor-not-allowed'
+            ].join(' '),
+            title: canDelete ? 'Delete' : 'Unauthorized',
+            color: canDelete ? undefined : 'none',
+            variant: canDelete ? undefined : 'none',
+            icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
+            disabled: !canDelete,
+            onClick: canDelete ? () => deleteRow(row.original.id) : undefined,
+          }, {
+            default: () => h('span', { class: 'max-lg:hidden' }, 'Delete')
+          })
+        ]),
       ])
     }
-}]
+  }
+]
 
 const table = useTemplateRef('table')
 </script>
