@@ -3,12 +3,12 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'My Orders' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-md:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <!-- Filter by Status -->
       <USelectMenu
         placeholder="Filter by status"
         :items="statusOptions"
-        class="w-48"
+        class="w-48 max-md:w-full"
         @update:model-value="val => table?.tableApi?.getColumn('status')?.setFilterValue(val === 'All' ? undefined : val)"
       />
 
@@ -16,7 +16,7 @@
       <USelectMenu
         placeholder="Filter by period"
         :items="periodOptions"
-        class="w-48"
+        class="w-48 max-md:w-full"
         @update:model-value="val => {
           if (val?.value === 'all') {
             table?.tableApi?.getColumn('createdAt')?.setFilterValue(undefined)
@@ -42,13 +42,15 @@
         :content="{ align: 'end' }"
       >
         <UButton
-          label="Columns"
           color="neutral"
           variant="outline"
           trailing-icon="i-lucide-chevron-down"
           class="ml-auto"
           aria-label="Columns select dropdown"
-        />
+        >
+          <span class="hidden md:inline">Columns</span>
+          <span class="inline md:hidden">Rows</span>
+        </UButton>
       </UDropdownMenu>
     </div>
 
@@ -61,8 +63,7 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="mt-2
-        min-h-96 
+      class="min-h-96 
         max-md:[&_th]:hidden 
         [&_th]:w-[45%] 
         max-md:[&_td]:flex
