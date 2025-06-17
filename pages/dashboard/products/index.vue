@@ -4,6 +4,15 @@
       <h1 class="text-xl font-bold">{{ 'Products' }}</h1>
     </header>
     <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+      <USelectMenu
+        placeholder="Filter by category"
+        :items="[{ label: 'All', value: 'All' }, ...(categories?.map(category => ({
+          label: category.name,
+          value: category.slug,
+        })) || [])]"
+        class="w-48 max-md:w-full"
+        @update:model-value="table?.tableApi?.getColumn('category')?.setFilterValue($event)"
+      />
       <UInput
         :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
         class="max-w-sm min-w-[12ch]"
@@ -74,7 +83,6 @@
 </template>
 
 <script setup lang="ts">
-import * as XLSX from 'xlsx'
 import { h, resolveComponent } from 'vue'
 import { upperFirst } from 'scule'
 import type { TableColumn } from '@nuxt/ui'
@@ -94,6 +102,7 @@ const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const data = ref<Product[] | null>(null);
+const categories = ref<Category[] | null>(null);
 let isLoading = ref(true);
 const error = ref<string | null>(null);
 
@@ -101,8 +110,19 @@ const canCreate = authStore.checkPermission('create-product')
 const canEdit = authStore.checkPermission('update-product')
 const canDelete = authStore.checkPermission('delete-product')
 
+async function getCategories() {
+  try {
+    const response = await useApi<Category[]>(`/categories`, {
+      method: 'GET',
+    });
+    categories.value = response;
+  } catch (err: any) {
+    console.error('Failed to fetch categories:', err);
+  }
+}
+
 onMounted(async () => {
-  await getProducts();
+  await [getProducts(), getCategories()];
 });
 
 const pagination = ref({
@@ -246,6 +266,11 @@ const columns: TableColumn<Product>[] = [
         h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Category:"),
         h('span', {}, category?.name || 'N/A')
       ])
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue.value || filterValue.value === 'All') return true
+      const category = row.getValue(columnId) as Category | null | undefined
+      return category?.slug === filterValue.value
     },
   },
   {
