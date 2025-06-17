@@ -31,12 +31,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function checkAuth() {
     if (process.client) {
-      const hasToken = !!localStorage.getItem('refresh_token');
-      if (hasToken) {
+      const access = localStorage.getItem('access_token');
+      if (access) {
+        try {
+          await getUser();
+        } catch (error: any) {
+          const hasRefresh = !!localStorage.getItem('refresh_token');
+          if (hasRefresh) {
+            return await refreshToken();
+          }
+          return false;
+        }
+      }
+      const hasRefresh = !!localStorage.getItem('refresh_token');
+      if (hasRefresh) {
         return await refreshToken();
       }
-      if (!user.value) await getUser();
-      return !!user.value;
+      return false;
     }
     return false;
   }
@@ -55,8 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
       return true;
     } catch (error) {
       console.error('Token refresh error:', error);
-      // localStorage.removeItem('access_token');
-      // localStorage.removeItem('refresh_token');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       return false;
     }
   }

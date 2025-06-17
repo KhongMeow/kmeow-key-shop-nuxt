@@ -6,12 +6,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const authStore = useAuthStore();
 
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    await authStore.getUser();
-  }
+  const isAuthenticated = await authStore.checkAuth();
 
-  if (!authStore.user?.role.rolePermissions.some((rolePermission) => rolePermission.permission.slug === 'access-users-setting')) {
+  if (isAuthenticated) {
+    if (!authStore.user?.role.rolePermissions.some((rolePermission) => rolePermission.permission.slug === 'access-users-setting')) {
+      return navigateTo('/auth/sign-in');
+    }
+  } else {
     return navigateTo('/auth/sign-in');
   }
 });

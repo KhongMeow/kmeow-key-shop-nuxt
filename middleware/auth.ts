@@ -5,13 +5,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const authStore = useAuthStore();
 
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    await authStore.getUser();
-  }
-
-  // After trying to load, if still no user, redirect
-  if (!authStore.user) {
+  const isAuthenticated = await authStore.checkAuth();
+  if (!isAuthenticated) {
     return navigateTo('/auth/sign-in');
   }
 });
