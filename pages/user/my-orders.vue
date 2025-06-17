@@ -61,11 +61,13 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="min-h-96 
-       max-md:[&_th]:hidden 
-       [&_th]:w-[45%] 
-       max-md:[&_td]:flex 
-       max-md:[&_tr]:bg-gray-700"
+      class="mt-2
+        min-h-96 
+        max-md:[&_th]:hidden 
+        [&_th]:w-[45%] 
+        max-md:[&_td]:flex
+        max-md:[&_tr]:border-b
+        max-md:[&_tr]:border-gray-500"
     />
 
     <div class="border-t border-default pt-2">
@@ -220,7 +222,7 @@ import { Icon } from '#components';
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium' }, "Order ID:"),
+      h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Order ID:"),
 
       h(
         resolveComponent('NuxtLink'),
@@ -278,7 +280,7 @@ import { Icon } from '#components';
       }
       const { class: statusClass, icon } = statusMap[String(status)] || statusMap['Order Created']
       return h('div', { class: 'w-full flex items-center justify-between' }, [
-        h('p', { class: 'text-sm font-medium' }, "Status:"),
+        h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Status:"),
 
         h('span', {
           class: `inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${statusClass}`
@@ -306,8 +308,8 @@ import { Icon } from '#components';
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium' }, "Created At:"),
-      h('span', { class: 'text-sm text-gray-600 dark:text-gray-400' }, new Date(row.getValue('createdAt')).toLocaleString())
+      h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Created At:"),
+      h('span', { class: 'text-sm text-gray-600 dark:text-gray-400' }, new Date(row.getValue('createdAt')).toLocaleString()),
     ]),
     // Add this filterFn:
     filterFn: (row, columnId, filterValue) => {
