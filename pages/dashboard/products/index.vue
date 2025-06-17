@@ -3,7 +3,7 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'Products' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-md:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <USelectMenu
         placeholder="Filter by category"
         :items="[{ label: 'All', value: 'All' }, ...(categories?.map(category => ({
@@ -15,7 +15,7 @@
       />
       <UInput
         :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
-        class="max-w-sm min-w-[12ch]"
+        class="w-48 max-md:w-full"
         placeholder="Filter names..."
         @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
       />
@@ -34,23 +34,26 @@
         }))"
         :content="{ align: 'end' }"
       >
-        <UButton
-          label="Columns"
-          color="neutral"
-          variant="outline"
-          trailing-icon="i-lucide-chevron-down"
-          class="ml-auto"
-          aria-label="Columns select dropdown"
-        />
-        <UButton
-          label="Create"
-          :title="canCreate ? 'Create' : 'Unauthorized'"
-          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-          color="primary"
-          class="mr-2"
-          :to="canCreate ? '/dashboard/products/create' : undefined"
-          :disabled="!canCreate"
-        />
+        <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+          <UButton
+            label="Columns"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-chevron-down"
+            class="ml-auto"
+            aria-label="Columns select dropdown"
+          />
+          <div class="flex ml-auto gap-2">
+            <UButton
+              label="Create"
+              :title="canCreate ? 'Create' : 'Unauthorized'"
+              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+              color="primary"
+              :to="canCreate ? '/dashboard/products/create' : undefined"
+              :disabled="!canCreate"
+            />
+          </div>
+        </div>
       </UDropdownMenu>
     </div>
 
@@ -63,7 +66,7 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="min-h-96 [&_th:not(:first-child)]:w-[15%] max-lg:[&_th]:hidden max-lg:[&_td]:flex max-lg:[&_tr]:border-b max-lg:[&_tr]:border-gray-500"
+      class="min-h-96 [&_th:not(:first-child)]:w-[15%] max-xl:[&_th]:hidden max-xl:[&_td]:flex max-xl:[&_tr]:border-b max-xl:[&_tr]:border-gray-500"
     />
 
     <div class="border-t border-default pt-2">
@@ -217,7 +220,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "No.:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "No.:"),
       h('span', {}, `${row.index + 1}`)
     ]),
   },
@@ -239,7 +242,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Name:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Name:"),
       h('span', {}, row.getValue('name'))
     ]),
   },
@@ -263,7 +266,7 @@ const columns: TableColumn<Product>[] = [
     cell: ({ row }) => {
       const category = row.getValue('category') as Category | null | undefined;
       return h('div', { class: 'w-full flex items-center justify-between' }, [
-        h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Category:"),
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Category:"),
         h('span', {}, category?.name || 'N/A')
       ])
     },
@@ -291,7 +294,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Detail:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Detail:"),
       h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('detail') || 'N/A')
     ]),
   },
@@ -313,7 +316,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Description:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Description:"),
       h('span', { class: 'block max-w-[7rem] truncate whitespace-nowrap overflow-hidden' }, row.getValue('description') || 'N/A')
     ]),
   },
@@ -335,7 +338,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Price:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Price:"),
       h('span', {}, row.getValue('price') !== undefined ? ('$' + row.getValue('price')) : 'N/A')
     ]),
   },
@@ -343,7 +346,7 @@ const columns: TableColumn<Product>[] = [
     accessorKey: 'image',
     header: 'Image',
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Image:"),
+      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Image:"),
       h('img', { src: useGetImageUrl(row.getValue('image')), alt: row.getValue('name'), class: 'w-16 h-16 object-cover' })
     ])
   },
@@ -352,11 +355,11 @@ const columns: TableColumn<Product>[] = [
     header: 'Actions',
     cell: ({ row }) => {
       return h('div', { class: 'flex w-full items-center justify-between' }, [
-        h('p', { class: 'text-sm font-medium hidden max-lg:block' }, "Actions:"),
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Actions:"),
         h('div', { class: 'flex items-center gap-2' }, [
           h(UButton, {
             class: [
-              'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
+              'px-2 py-1 rounded flex items-center transition-colors bg-blue-600 text-white',
               canEdit
                 ? 'hover:bg-blue-700'
                 : 'cursor-not-allowed'
@@ -368,7 +371,7 @@ const columns: TableColumn<Product>[] = [
             disabled: !canEdit,
             onClick: canEdit ? () => navigateTo(`/dashboard/products/${row.original.slug}/edit`) : undefined,
           }, {
-            default: () => h('span', { class: 'max-lg:hidden' }, 'Edit')
+            default: () => h('span', { class: 'max-xl:hidden' }, 'Edit')
           }),
           h(UButton, {
             class: [
@@ -384,7 +387,7 @@ const columns: TableColumn<Product>[] = [
             disabled: !canDelete,
             onClick: canDelete ? () => deleteRow(row.original.slug) : undefined,
           }, {
-            default: () => h('span', { class: 'max-lg:hidden' }, 'Delete')
+            default: () => h('span', { class: 'max-xl:hidden' }, 'Delete')
           })
         ]),
       ])
