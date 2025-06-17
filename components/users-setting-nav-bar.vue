@@ -59,7 +59,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-300">{{ user?.email }}</p>
                 <hr class="my-2 border-gray-300 dark:border-gray-600" />
                 <NuxtLink 
-                  to="/user/my-profile"
+                  to="/user/update-profile"
                   class="block text-gray-800 dark:text-gray-200 font-medium p-2 my-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   active-class="bg-gray-100 dark:bg-gray-500 text-blue-600 dark:text-blue-400"
                   exact
@@ -126,28 +126,11 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from '~/store/authStore';
-import { useApi } from '~/composables/useApi';
 
 const isDark = ref(false);
 const authStore = useAuthStore();
 const menuOpen = ref(false);
 const userPopoverOpen = ref(false);
-type RolePermission = {
-  permission: {
-    slug: string;
-  };
-};
-
-type Role = {
-  rolePermissions: RolePermission[];
-};
-
-type User = {
-  fullname: string;
-  username: string;
-  email: string;
-  role: Role | Role[];
-};
 
 // const user = ref<User | null>(null);
 const user = computed(() => {

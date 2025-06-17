@@ -221,7 +221,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function updateUser(id: number, fullname: string, email: string) {
+  async function updateUser(fullname: string, email: string) {
     try {
       isUpdating.value = true;
       const response = await useApi<User>(`/users`, {

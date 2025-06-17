@@ -106,7 +106,7 @@
             <div v-if="authStore.user" class="flex items-center gap-4 justify-end">
               <div @click="toggleUserPopover" class="hover:cursor-pointer hover:text-gray-800 text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-bold flex items-center gap-1">
                 <Icon name="mdi:account" class="text-4xl" />
-                <p class="max-sm:hidden">{{ user?.fullname }}</p>
+                <p class="max-sm:hidden text-nowrap">{{ user?.fullname }}</p>
               </div>
               <!-- User Popover -->
               <div
@@ -118,7 +118,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-300">{{ user?.email }}</p>
                 <hr class="my-2 border-gray-300 dark:border-gray-600" />
                 <NuxtLink 
-                  to="/user/my-profile"
+                  to="/user/update-profile"
                   class="block text-gray-800 dark:text-gray-200 font-medium p-2 my-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   active-class="bg-gray-100 dark:bg-gray-500 text-blue-600 dark:text-blue-400"
                   exact
@@ -165,11 +165,13 @@
               </div>
             </div>
             <div v-else class="flex items-center gap-4">
-              <NuxtLink to="/auth/sign-in" class="hover:cursor-pointer hover:text-blue-500 text-gray-800 dark:text-white font-bold">
-                Sign In
+              <NuxtLink to="/auth/sign-in" class="flex items-center gap-2 hover:cursor-pointer hover:text-blue-500 text-gray-800 dark:text-white font-bold">
+                <Icon name="mdi:login" class="text-4xl text-gray-400 hover:text-gray-500" />
+                <p class="max-sm:hidden text-nowrap">{{ "Sign In" }}</p>
               </NuxtLink>
-              <NuxtLink to="/auth/sign-up" class="hover:cursor-pointer hover:text-blue-500 text-gray-800 dark:text-white font-bold">
-                Sign Up
+              <NuxtLink name="Sign Up" to="/auth/sign-up" class="flex items-center gap-2 hover:cursor-pointer hover:text-blue-500 text-gray-800 dark:text-white font-bold">
+                <Icon name="mdi:register" class="text-4xl text-gray-400 hover:text-gray-500" />
+                <p class="max-sm:hidden text-nowrap">{{ "Sign Up" }}</p>
               </NuxtLink>
             </div>
           </div>
