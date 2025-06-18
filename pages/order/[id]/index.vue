@@ -335,13 +335,13 @@ const canConfirmPayment = computed(() => {
 async function getOrder() {
   try {
     isLoading.value = true
-    const response = await useApi<Order>(`/orders/${orderId}`, {
+    const response = await useApi<Order>(`/orders/my-order/${orderId}`, {
       method: 'GET',
     })
     order.value = response
   } catch (error) {
-    console.error(error)
     order.value = undefined
+    navigateTo('/errors/not-found');
   } finally {
     isLoading.value = false
   }

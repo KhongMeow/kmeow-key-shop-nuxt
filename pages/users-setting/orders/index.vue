@@ -76,7 +76,7 @@
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
       class="min-h-96 
         max-md:[&_th]:hidden 
-        [&_th]:w-[45%] 
+        [&_th]:w-[25%] 
         max-md:[&_td]:flex
         max-md:[&_tr]:border-b
         max-md:[&_tr]:border-gray-500"

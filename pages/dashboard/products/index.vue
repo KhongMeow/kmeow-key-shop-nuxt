@@ -20,21 +20,21 @@
         @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
       />
 
-      <UDropdownMenu
-        :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
-          label: upperFirst(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))"
-        :content="{ align: 'end' }"
-      >
-        <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+      <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
+            label: upperFirst(column.id),
+            type: 'checkbox' as const,
+            checked: column.getIsVisible(),
+            onUpdateChecked(checked: boolean) {
+              table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+            },
+            onSelect(e?: Event) {
+              e?.preventDefault()
+            }
+          }))"
+          :content="{ align: 'end' }"
+        >
           <UButton
             label="Columns"
             color="neutral"
@@ -43,18 +43,17 @@
             class="ml-auto"
             aria-label="Columns select dropdown"
           />
-          <div class="flex ml-auto gap-2">
-            <UButton
-              label="Create"
-              :title="canCreate ? 'Create' : 'Unauthorized'"
-              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-              color="primary"
-              :to="canCreate ? '/dashboard/products/create' : undefined"
-              :disabled="!canCreate"
-            />
-          </div>
-        </div>
-      </UDropdownMenu>
+        </UDropdownMenu>
+        
+        <UButton
+          label="Create"
+          :title="canCreate ? 'Create' : 'Unauthorized'"
+          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+          color="primary"
+          :to="canCreate ? '/dashboard/products/create' : undefined"
+          :disabled="!canCreate"
+        />
+      </div>
     </div>
 
     <UTable
