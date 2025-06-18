@@ -31,23 +31,24 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function checkAuth() {
     if (process.client) {
-      const access = localStorage.getItem('access_token');
+      const access = !!localStorage.getItem('access_token');
       if (access) {
         try {
           await getUser();
+          return true;
         } catch (error: any) {
           const hasRefresh = !!localStorage.getItem('refresh_token');
           if (hasRefresh) {
             return await refreshToken();
           }
-          return false;
         }
+      }else {
+        const hasRefresh = !!localStorage.getItem('refresh_token');
+        if (hasRefresh) {
+          return await refreshToken();
+        }
+        return false;
       }
-      const hasRefresh = !!localStorage.getItem('refresh_token');
-      if (hasRefresh) {
-        return await refreshToken();
-      }
-      return false;
     }
     return false;
   }
@@ -65,9 +66,9 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('refresh_token', response.refreshToken);
       return true;
     } catch (error) {
-      // console.error('Token refresh error:', error);
-      // localStorage.removeItem('access_token');
-      // localStorage.removeItem('refresh_token');
+      console.error('Token refresh error:', error);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       return false;
     }
   }
@@ -227,6 +228,7 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Error fetching user:', error);
       user.value = null;
       localStorage.removeItem('user');
+      throw error;
     } finally {
       isLoading.value = false;
     }
