@@ -20,21 +20,21 @@
         @update:model-value="table?.tableApi?.getColumn('status')?.setFilterValue($event)"
       />
 
-      <UDropdownMenu
-        :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
-          label: upperFirst(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))"
-        :content="{ align: 'end' }"
-      >
-        <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+      <div class="flex max-md:flex-col-reverse ml-auto gap-2">
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
+            label: upperFirst(column.id),
+            type: 'checkbox' as const,
+            checked: column.getIsVisible(),
+            onUpdateChecked(checked: boolean) {
+              table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+            },
+            onSelect(e?: Event) {
+              e?.preventDefault()
+            }
+          }))"
+          :content="{ align: 'end' }"
+        >
           <UButton
             label="Columns"
             color="neutral"
@@ -43,35 +43,36 @@
             class="ml-auto"
             aria-label="Columns select dropdown"
           />
-          <div class="flex ml-auto gap-2">
-            <UButton
-              label="Create"
-              :title="canCreate ? 'Create' : 'Unauthorized'"
-              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-              color="primary"
-              :to="canCreate ? '/dashboard/license-keys/create' : undefined"
-              :disabled="!canCreate"
-            />
-            <UButton
-              label="Import"
-              :title="canCreate ? 'Import' : 'Unauthorized'"
-              :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-              color="primary"
-              leading-icon="tabler:file-import"
-              @click="triggerFileInput"
-              :disabled="!canCreate"
-            />
-            <input
-              ref="fileInput"
-              type="file"
-              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              class="hidden"
-              @change="handleFileUpload"
-              :disabled="!canCreate"
-            />
-          </div>
+        </UDropdownMenu>
+        
+        <div class="flex ml-auto gap-2">
+          <UButton
+            label="Create"
+            :title="canCreate ? 'Create' : 'Unauthorized'"
+            :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+            color="primary"
+            :to="canCreate ? '/dashboard/license-keys/create' : undefined"
+            :disabled="!canCreate"
+          />
+          <UButton
+            label="Import"
+            :title="canCreate ? 'Import' : 'Unauthorized'"
+            :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+            color="primary"
+            leading-icon="tabler:file-import"
+            @click="triggerFileInput"
+            :disabled="!canCreate"
+          />
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            class="hidden"
+            @change="handleFileUpload"
+            :disabled="!canCreate"
+          />
         </div>
-      </UDropdownMenu>
+      </div>
     </div>
 
     <UTable

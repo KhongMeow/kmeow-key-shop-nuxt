@@ -3,46 +3,47 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'Roles' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-sm:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
         :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
-        class="max-w-sm min-w-[12ch]"
+        class="w-48 max-sm:w-full"
         placeholder="Filter names..."
         @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
       />
 
-      <UDropdownMenu
-        :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
-          label: upperFirst(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))"
-        :content="{ align: 'end' }"
-      >
-        <UButton
-          label="Columns"
-          color="neutral"
-          variant="outline"
-          trailing-icon="i-lucide-chevron-down"
-          class="ml-auto"
-          aria-label="Columns select dropdown"
-        />
+      <div class="flex max-sm:flex-col-reverse ml-auto gap-2">
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
+            label: upperFirst(column.id),
+            type: 'checkbox' as const,
+            checked: column.getIsVisible(),
+            onUpdateChecked(checked: boolean) {
+              table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+            },
+            onSelect(e?: Event) {
+              e?.preventDefault()
+            }
+          }))"
+          :content="{ align: 'end' }"
+        >
+          <UButton
+            label="Columns"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-chevron-down"
+            aria-label="Columns select dropdown"
+          />
+        </UDropdownMenu>
+
         <UButton
           label="Create"
           :title="canCreate ? 'Create' : 'Unauthorized'"
           :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
           color="primary"
-          class="mr-2"
           :to="canCreate ? '/users-setting/role-permissions/create' : undefined"
           :disabled="!canCreate"
         />
-      </UDropdownMenu>
+      </div>
     </div>
 
     <UTable
@@ -54,7 +55,7 @@
       :columns="columns"
       :grouping="['roleId']"
       :grouping-options="grouping_options"
-      class="min-h-96"
+      class="min-h-96 max-md:[&_th]:hidden  [&_th]:w-[45%]  max-md:[&_td]:flex max-md:[&_tr]:border-b max-md:[&_tr]:border-gray-500"
       :ui="{
         root: 'min-w-full',
         td: 'empty:p-0',
@@ -287,82 +288,96 @@
     getGroupedRowModel: getGroupedRowModel()
   })
 
-  const columns: TableColumn<any>[] = [{
-    id: 'title',
-    header: 'Role / Permission'
-  }, {
-    id: 'roleId',
-    accessorKey: 'roleId'
-  }, {
-    accessorKey: 'name',
-    header: 'Name',
-    cell: ({ row }) => {
-      if (row.getIsGrouped()) {
-        if (row.original.isEmpty) {
-          return h('span', { class: 'text-muted' }, '(No permissions)')
+  const columns: TableColumn<any>[] = [
+    {
+      id: 'title',
+      header: 'Role / Permission'
+    },
+    {
+      id: 'roleId',
+      accessorKey: 'roleId'
+    },
+    {
+      accessorKey: 'name',
+      header: 'Name',
+      cell: ({ row }) => {
+        if (row.getIsGrouped()) {
+          if (row.original.isEmpty) {
+            return h('span', { class: 'text-muted' }, '(No permissions)')
+          }
+          return `${row.subRows?.length} permissions`
         }
-        return `${row.subRows?.length} permissions`
-      }
-      return row.getValue('name')
-    }
-  }, {
-    accessorKey: 'type',
-    header: 'Type',
-    cell: ({ row }) => {
-      if (row.getIsGrouped()) return ''
-      const type = row.getValue('type')
-      return h(UBadge, {
-        color: type === 'role' ? 'primary' : 'neutral',
-        variant: 'subtle',
-        class: 'capitalize'
-      }, () => type)
-    }
-  }, {
-    accessorKey: 'actions',
-    header: 'Actions',
-    cell: ({ row }) => {
-      if (row.getIsGrouped()) return ''
-      const isPermission = row.getValue('type') === 'permission'
-      if (isPermission) {
-        // Actions for permissions
-        return h('div', { class: 'flex gap-1' }, [
-          h(UButton, {
-            class: [
-              'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
-              canEdit
-                ? 'hover:bg-blue-700'
-                : 'cursor-not-allowed'
-            ].join(' '),
-            title: canEdit ? 'Edit' : 'Unauthorized',
-            color: canEdit ? undefined : 'none',
-            variant: canEdit ? undefined : 'none',
-            icon: canEdit ? 'tabler:edit' : 'tabler:lock',
-            disabled: !canEdit,
-            onClick: canEdit ? () => navigateTo(`/users-setting/role-permissions/${row.original.slug}/edit`) : undefined,
-          }, {
-            default: () => h('span', { class: 'hidden sm:inline' }, 'Edit')
-          }),
-          h(UButton, {
-            class: [
-              'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
-              canDelete
-                ? 'hover:bg-red-700'
-                : 'cursor-not-allowed'
-            ].join(' '),
-            title: canDelete ? 'Delete' : 'Unauthorized',
-            color: canDelete ? undefined : 'none',
-            variant: canDelete ? undefined : 'none',
-            icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
-            disabled: !canDelete,
-            onClick: canDelete ? () => deleteRow(row.original.slug) : undefined,
-          }, {
-            default: () => h('span', { class: 'hidden sm:inline' }, 'Delete')
-          })
+        return h('div', { class: 'w-full flex items-center justify-between' }, [
+          h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Name:"),
+          h('span', {}, row.getValue('name'))
         ])
       }
-      return ''
+    },
+    {
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row }) => {
+        if (row.getIsGrouped()) return ''
+        const type = row.getValue('type')
+        return h('div', { class: 'w-full flex items-center justify-between' }, [
+          h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Type:"),
+          h(UBadge, {
+            color: type === 'role' ? 'primary' : 'neutral',
+            variant: 'subtle',
+            class: 'capitalize'
+          }, () => type)
+        ])
+      }
+    },
+    {
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        if (row.getIsGrouped()) return ''
+        const isPermission = row.getValue('type') === 'permission'
+        if (isPermission) {
+          return h('div', { class: 'flex w-full items-center justify-between' }, [
+            h('p', { class: 'text-sm font-medium hidden max-md:block' }, "Actions:"),
+            h('div', { class: 'flex items-center gap-2' }, [
+              h(UButton, {
+                class: [
+                  'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
+                  canEdit
+                    ? 'hover:bg-blue-700'
+                    : 'cursor-not-allowed'
+                ].join(' '),
+                title: canEdit ? 'Edit' : 'Unauthorized',
+                color: canEdit ? undefined : 'none',
+                variant: canEdit ? undefined : 'none',
+                icon: canEdit ? 'tabler:edit' : 'tabler:lock',
+                disabled: !canEdit,
+                onClick: canEdit ? () => navigateTo(`/users-setting/role-permissions/${row.original.slug}/edit`) : undefined,
+              }, {
+                default: () => h('span', { class: 'hidden lg:inline' }, 'Edit')
+              }),
+              h(UButton, {
+                class: [
+                  'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
+                  canDelete
+                    ? 'hover:bg-red-700'
+                    : 'cursor-not-allowed'
+                ].join(' '),
+                title: canDelete ? 'Delete' : 'Unauthorized',
+                color: canDelete ? undefined : 'none',
+                variant: canDelete ? undefined : 'none',
+                icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
+                disabled: !canDelete,
+                onClick: canDelete ? () => deleteRow(row.original.slug) : undefined,
+              }, {
+                default: () => h('span', { class: 'hidden lg:inline' }, 'Delete')
+              })
+            ])
+          ])
+        }
+        return ''
+      }
     }
-  }]
+  ]
 
   const table = useTemplateRef('table')
 </script>

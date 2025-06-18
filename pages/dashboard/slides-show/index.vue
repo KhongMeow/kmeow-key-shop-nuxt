@@ -6,45 +6,44 @@
     <div class="flex max-sm:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
         :model-value="(table?.tableApi?.getColumn('title')?.getFilterValue() as string)"
-        class="w-48 max-md:w-full"
+        class="w-48 max-sm:w-full"
         placeholder="Filter titles..."
         @update:model-value="table?.tableApi?.getColumn('title')?.setFilterValue($event)"
       />
 
-      <UDropdownMenu
-        :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
-          label: upperFirst(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))"
-        :content="{ align: 'end' }"
-      >
-        <div class="flex max-sm:flex-col-reverse ml-auto gap-2">
+      <div class="flex max-sm:flex-col-reverse ml-auto gap-2">
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
+            label: upperFirst(column.id),
+            type: 'checkbox' as const,
+            checked: column.getIsVisible(),
+            onUpdateChecked(checked: boolean) {
+              table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+            },
+            onSelect(e?: Event) {
+              e?.preventDefault()
+            }
+          }))"
+          :content="{ align: 'end' }"
+        >
           <UButton
             label="Columns"
             color="neutral"
             variant="outline"
             trailing-icon="i-lucide-chevron-down"
-            class="ml-auto"
             aria-label="Columns select dropdown"
           />
+        </UDropdownMenu>
 
-          <UButton
-            label="Create"
-            :title="canCreate ? 'Create' : 'Unauthorized'"
-            :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-            color="primary"
-            :to="canCreate ? '/dashboard/slides-show/create' : undefined"
-            :disabled="!canCreate"
-          />
-        </div>
-      </UDropdownMenu>
+        <UButton
+          label="Create"
+          :title="canCreate ? 'Create' : 'Unauthorized'"
+          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+          color="primary"
+          :to="canCreate ? '/dashboard/slides-show/create' : undefined"
+          :disabled="!canCreate"
+        />
+      </div>
     </div>
 
     <UTable

@@ -3,46 +3,47 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'Users' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-sm:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
         :model-value="(table?.tableApi?.getColumn('username')?.getFilterValue() as string)"
-        class="max-w-sm min-w-[12ch]"
+        class="w-48 max-sm:w-full"
         placeholder="Filter usernames..."
         @update:model-value="table?.tableApi?.getColumn('username')?.setFilterValue($event)"
       />
 
-      <UDropdownMenu
-        :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
-          label: upperFirst(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))"
-        :content="{ align: 'end' }"
-      >
+      <div class="flex max-sm:flex-col-reverse ml-auto gap-2">
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns().filter(column => column.getCanHide()).map(column => ({
+            label: upperFirst(column.id),
+            type: 'checkbox' as const,
+            checked: column.getIsVisible(),
+            onUpdateChecked(checked: boolean) {
+              table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+            },
+            onSelect(e?: Event) {
+              e?.preventDefault()
+            }
+          }))"
+          :content="{ align: 'end' }"
+        >
+          <UButton
+            label="Columns"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-chevron-down"
+            aria-label="Columns select dropdown"
+          />
+        </UDropdownMenu>
+
         <UButton
-          label="Columns"
-          color="neutral"
-          variant="outline"
-          trailing-icon="i-lucide-chevron-down"
-          class="ml-auto"
-          aria-label="Columns select dropdown"
-        />
-        <!-- <UButton
           label="Create"
           :title="canCreate ? 'Create' : 'Unauthorized'"
           :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
           color="primary"
-          class="mr-2"
           :to="canCreate ? '/users-setting/users/create' : undefined"
           :disabled="!canCreate"
-        /> -->
-      </UDropdownMenu>
+        />
+      </div>
     </div>
 
     <UTable
@@ -54,7 +55,7 @@
       :data="data ?? undefined"
       :columns="columns"
       :pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
-      class="min-h-96 [&_th:not(:first-child)]:w-[25%]"
+      class="min-h-96 [&_th:not(:first-child)]:w-[25%] max-xl:[&_th]:hidden max-xl:[&_td]:flex max-xl:[&_tr]:border-b max-xl:[&_tr]:border-gray-500"
     />
 
     <div class="border-t border-default pt-2">
@@ -389,137 +390,177 @@
     }
   }
 
-  const columns: TableColumn<User>[] = [{
-    accessorKey: 'id',
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted()
-
-      return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    },
-    cell: ({ row }) => `${row.index + 1}`,
-  }, {
-    accessorKey: 'fullname',
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted()
-      
-      return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        label: 'Full Name',
-        icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    },
-    cell: ({ row }) => row.getValue('fullname'),
-  }, {
-    accessorKey: 'username',
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted()
-      
-      return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        label: 'Username',
-        icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    },
-    cell: ({ row }) => row.getValue('username'),
-  }, {
-    accessorKey: 'role',
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted()
-      
-      return h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        label: 'Role',
-        icon: isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        class: '-mx-2.5',
-        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-      })
-    },
-    cell: ({ row }) => row.original.role.name,
-  }, {
-    accessorKey: 'actions',
-    header: 'Actions',
-    cell: ({ row }) => {
-      return h('div', { class: 'flex' }, [
-        h(UButton, {
-          class: [
-            'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
-            canChangeRole
-              ? 'hover:bg-blue-700'
-              : 'cursor-not-allowed'
-          ].join(' '),
-          title: canChangeRole ? 'Change Role' : 'Unauthorized',
-          color: canChangeRole ? undefined : 'none',
-          variant: canChangeRole ? undefined : 'none',
-          icon: canChangeRole ? 'tabler:edit' : 'tabler:lock',
-          disabled: !canChangeRole,
-          onClick: canChangeRole ? () => changeRoleUser(row.original.username) : undefined,
-        }, {
-          default: () => h('span', { class: 'hidden lg:inline' }, 'Change Role')
-        }),
-        h(UButton, {
-          class: [
-            'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-yellow-600 text-white',
-            canResetPassword
-              ? 'hover:bg-yellow-700'
-              : 'cursor-not-allowed'
-          ].join(' '),
-          title: canResetPassword ? 'Reset Password' : 'Unauthorized',
-          color: canResetPassword ? undefined : 'none',
-          variant: canResetPassword ? undefined : 'none',
-          icon: canResetPassword ? 'tabler:reload' : 'tabler:lock',
-          disabled: !canResetPassword,
-          onClick: canResetPassword ? () => resetPasswordUser(row.original.username) : undefined,
-        }, {
-          default: () => h('span', { class: 'hidden lg:inline' }, 'Reset Password')
-        }),
-        h(UButton, {
-          class: [
-            'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
-            canDelete
-              ? 'hover:bg-red-700'
-              : 'cursor-not-allowed'
-          ].join(' '),
-          title: canDelete ? 'Delete' : 'Unauthorized',
-          color: canDelete ? undefined : 'none',
-          variant: canDelete ? undefined : 'none',
-          icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
-          disabled: !canDelete,
-          onClick: canDelete ? () => deleteRow(row.original.username) : undefined,
-        }, {
-          default: () => h('span', { class: 'hidden lg:inline' }, 'Delete')
+  const columns: TableColumn<User>[] = [
+    {
+      accessorKey: 'id',
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted()
+        return h(UButton, {
+          color: 'neutral',
+          variant: 'ghost',
+          label: 'No.',
+          icon: isSorted
+            ? isSorted === 'asc'
+              ? 'i-lucide-arrow-up-narrow-wide'
+              : 'i-lucide-arrow-down-wide-narrow'
+            : 'i-lucide-arrow-up-down',
+          class: '-mx-2.5',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
         })
-      ])
+      },
+      cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "No.:"),
+        h('span', {}, `${row.index + 1}`)
+      ]),
+    },
+    {
+      accessorKey: 'fullname',
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted()
+        return h(UButton, {
+          color: 'neutral',
+          variant: 'ghost',
+          label: 'Full Name',
+          icon: isSorted
+            ? isSorted === 'asc'
+              ? 'i-lucide-arrow-up-narrow-wide'
+              : 'i-lucide-arrow-down-wide-narrow'
+            : 'i-lucide-arrow-up-down',
+          class: '-mx-2.5',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        })
+      },
+      cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Full Name:"),
+        h('span', {}, row.getValue('fullname'))
+      ]),
+    },
+    {
+      accessorKey: 'username',
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted()
+        return h(UButton, {
+          color: 'neutral',
+          variant: 'ghost',
+          label: 'Username',
+          icon: isSorted
+            ? isSorted === 'asc'
+              ? 'i-lucide-arrow-up-narrow-wide'
+              : 'i-lucide-arrow-down-wide-narrow'
+            : 'i-lucide-arrow-up-down',
+          class: '-mx-2.5',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        })
+      },
+      cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Username:"),
+        h('span', {}, row.getValue('username'))
+      ]),
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted()
+        return h(UButton, {
+          color: 'neutral',
+          variant: 'ghost',
+          label: 'Email',
+          icon: isSorted
+            ? isSorted === 'asc'
+              ? 'i-lucide-arrow-up-narrow-wide'
+              : 'i-lucide-arrow-down-wide-narrow'
+            : 'i-lucide-arrow-up-down',
+          class: '-mx-2.5',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        })
+      },
+      cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Email:"),
+        h('span', {}, row.getValue('email'))
+      ]),
+    },
+    {
+      accessorKey: 'role',
+      header: ({ column }) => {
+        const isSorted = column.getIsSorted()
+        return h(UButton, {
+          color: 'neutral',
+          variant: 'ghost',
+          label: 'Role',
+          icon: isSorted
+            ? isSorted === 'asc'
+              ? 'i-lucide-arrow-up-narrow-wide'
+              : 'i-lucide-arrow-down-wide-narrow'
+            : 'i-lucide-arrow-up-down',
+          class: '-mx-2.5',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        })
+      },
+      cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
+        h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Role:"),
+        h('span', {}, row.original.role.name)
+      ]),
+    },
+    {
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        return h('div', { class: 'flex w-full items-center justify-between' }, [
+          h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "Actions:"),
+          h('div', { class: 'flex items-center gap-2' }, [
+            h(UButton, {
+              class: [
+                'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
+                canChangeRole
+                  ? 'hover:bg-blue-700'
+                  : 'cursor-not-allowed'
+              ].join(' '),
+              title: canChangeRole ? 'Change Role' : 'Unauthorized',
+              color: canChangeRole ? undefined : 'none',
+              variant: canChangeRole ? undefined : 'none',
+              icon: canChangeRole ? 'tabler:edit' : 'tabler:lock',
+              disabled: !canChangeRole,
+              onClick: canChangeRole ? () => changeRoleUser(row.original.username) : undefined,
+            }, {
+              default: () => h('span', { class: 'hidden lg:inline' }, 'Change Role')
+            }),
+            h(UButton, {
+              class: [
+                'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-yellow-600 text-white',
+                canResetPassword
+                  ? 'hover:bg-yellow-700'
+                  : 'cursor-not-allowed'
+              ].join(' '),
+              title: canResetPassword ? 'Reset Password' : 'Unauthorized',
+              color: canResetPassword ? undefined : 'none',
+              variant: canResetPassword ? undefined : 'none',
+              icon: canResetPassword ? 'tabler:reload' : 'tabler:lock',
+              disabled: !canResetPassword,
+              onClick: canResetPassword ? () => resetPasswordUser(row.original.username) : undefined,
+            }, {
+              default: () => h('span', { class: 'hidden lg:inline' }, 'Reset Password')
+            }),
+            h(UButton, {
+              class: [
+                'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
+                canDelete
+                  ? 'hover:bg-red-700'
+                  : 'cursor-not-allowed'
+              ].join(' '),
+              title: canDelete ? 'Delete' : 'Unauthorized',
+              color: canDelete ? undefined : 'none',
+              variant: canDelete ? undefined : 'none',
+              icon: canDelete ? 'tabler:trash-filled' : 'tabler:lock',
+              disabled: !canDelete,
+              onClick: canDelete ? () => deleteRow(row.original.username) : undefined,
+            }, {
+              default: () => h('span', { class: 'hidden lg:inline' }, 'Delete')
+            })
+          ]),
+        ])
+      }
     }
-  }]
+  ]
 
   const table = useTemplateRef('table')
 </script>

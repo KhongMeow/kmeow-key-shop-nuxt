@@ -17,6 +17,18 @@
             ]"
             class="absolute lg:static top-20 left-0 w-full lg:w-auto bg-gray-100 dark:bg-gray-800 lg:bg-transparent"
           >
+
+            <NuxtLink
+              :to="`/users-setting/orders`"
+              @click="closeMenu"
+              :class="[
+                'hover:cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 max-lg:hover:bg-gray-300 max-lg:dark:hover:bg-gray-500 font-bold p-2 w-full text-center rounded',
+                $route.path.startsWith(`/users-setting/orders`) ? 'text-gray-700 dark:text-gray-300 max-lg:bg-gray-400 max-lg:dark:bg-gray-600' : 'text-gray-600 dark:text-gray-400 max-lg:bg-gray-200 max-lg:dark:bg-gray-700'
+              ]"
+            >
+              Orders
+            </NuxtLink>
+
             <NuxtLink
               :to="`/users-setting/roles`"
               @click="closeMenu"

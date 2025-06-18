@@ -65,9 +65,9 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('refresh_token', response.refreshToken);
       return true;
     } catch (error) {
-      console.error('Token refresh error:', error);
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      // console.error('Token refresh error:', error);
+      // localStorage.removeItem('access_token');
+      // localStorage.removeItem('refresh_token');
       return false;
     }
   }
