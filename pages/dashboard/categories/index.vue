@@ -3,10 +3,10 @@
     <header class="flex items-center justify-between border-b border-default p-4">
       <h1 class="text-xl font-bold">{{ 'Categories' }}</h1>
     </header>
-    <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
+    <div class="flex max-sm:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
         :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
-        class="max-w-sm min-w-[12ch]"
+        class="w-48 max-md:w-full"
         placeholder="Filter names..."
         @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
       />
@@ -25,23 +25,24 @@
         }))"
         :content="{ align: 'end' }"
       >
-        <UButton
-          label="Columns"
-          color="neutral"
-          variant="outline"
-          trailing-icon="i-lucide-chevron-down"
-          class="ml-auto"
-          aria-label="Columns select dropdown"
-        />
-        <UButton
-          label="Create"
-          :title="canCreate ? 'Create' : 'Unauthorized'"
-          :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
-          color="primary"
-          class="mr-2"
-          :to="canCreate ? '/dashboard/categories/create' : undefined"
-          :disabled="!canCreate"
-        />
+        <div class="flex max-sm:flex-col-reverse ml-auto gap-2">
+          <UButton
+            label="Columns"
+            color="neutral"
+            variant="outline"
+            trailing-icon="i-lucide-chevron-down"
+            class="ml-auto"
+            aria-label="Columns select dropdown"
+          />
+          <UButton
+            label="Create"
+            :title="canCreate ? 'Create' : 'Unauthorized'"
+            :icon="canCreate ? 'tabler:plus' : 'tabler:lock'"
+            color="primary"
+            :to="canCreate ? '/dashboard/categories/create' : undefined"
+            :disabled="!canCreate"
+          />
+        </div>
       </UDropdownMenu>
     </div>
 

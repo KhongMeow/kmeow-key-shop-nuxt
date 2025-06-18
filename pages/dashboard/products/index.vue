@@ -210,6 +210,7 @@ const columns: TableColumn<Product>[] = [
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
+        label: 'No.',
         icon: isSorted
           ? isSorted === 'asc'
             ? 'i-lucide-arrow-up-narrow-wide'
@@ -220,7 +221,7 @@ const columns: TableColumn<Product>[] = [
       })
     },
     cell: ({ row }) => h('div', { class: 'w-full flex items-center justify-between' }, [
-      h('p', { class: 'text-sm font-medium hidden max-xl:block' }, "No.:"),
+      h('p', { class: 'text-sm font-medium hidden max-md:block' }, "No.:"),
       h('span', {}, `${row.index + 1}`)
     ]),
   },
