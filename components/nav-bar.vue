@@ -323,6 +323,8 @@ watch(
 );
 
 onMounted(async () => {
+  await authStore.checkAuth();
+
   // Initialize dark mode from localStorage or system preference
   const savedTheme = localStorage.getItem('theme')
 

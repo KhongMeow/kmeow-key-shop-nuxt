@@ -89,7 +89,6 @@
 
     <div class="border-t border-default pt-2">
       <div class="px-4 text-sm text-muted">
-        {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
         {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
       </div>
       
@@ -159,7 +158,7 @@ const canCreate = authStore.checkPermission('create-license-key')
 const canEdit = authStore.checkPermission('update-license-key')
 const canDelete = authStore.checkPermission('delete-license-key')
 
-const items = ref(['All', 'Active', 'Waiting Payment', 'Cancelled', 'Paid', 'Delivered'])
+const items = ref(['All', 'Active', 'Ordered', 'Sold'])
 const products = ref<Product[] | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 

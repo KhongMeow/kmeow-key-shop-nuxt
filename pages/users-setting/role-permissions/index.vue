@@ -94,7 +94,7 @@
 
     <div class="border-t border-default pt-2">
       <div class="px-4 text-sm text-muted">
-        {{ paginatedRoles.length }} of {{ filteredRoles.length }} row(s) selected.
+        {{ filteredRoles.length }} row(s) selected.
       </div>
       
       <UPagination class="flex justify-center"

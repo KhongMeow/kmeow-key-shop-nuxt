@@ -70,7 +70,6 @@
 
     <div class="border-t border-default pt-2">
       <div class="px-4 text-sm text-muted">
-        {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
         {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
       </div>
       

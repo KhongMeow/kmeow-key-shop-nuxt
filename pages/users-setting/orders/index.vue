@@ -84,11 +84,6 @@
 
     <div class="border-t border-default pt-2">
       <div class="px-4 text-sm text-muted">
-      {{(
-          table?.tableApi?.getPaginationRowModel().rows.filter(
-            row => table?.tableApi?.getState().rowSelection?.[row.id]
-          ).length || 0
-      )}} of
       {{
         table?.tableApi?.getPaginationRowModel().rows.length || 0
       }} row(s) selected on this page.
