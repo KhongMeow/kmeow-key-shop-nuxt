@@ -22,7 +22,9 @@
         :error="errors.password"
       />
       <div class="flex justify-end">
-        <p class="hover:cursor-pointer hover:text-blue-500 text-center text-sm font-medium dark:text-white">Forgot password?</p>
+        <NuxtLink to="/auth/forgot-password" class="hover:cursor-pointer hover:text-blue-500 text-sm font-medium dark:text-white">
+          {{ "Forgot Password?" }}
+        </NuxtLink>
       </div>
       <div v-if="authStore.signInError" id="error" class="my-4 bg-gray-200 p-4 rounded-lg text-center dark:bg-gray-700">
         <p class="text-red-500 text-sm font-medium dark:text-red-400">{{ authStore.signInError }}</p>

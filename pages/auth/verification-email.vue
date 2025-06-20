@@ -5,7 +5,7 @@
         <div class="bg-green-500 rounded-full p-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-16 w-16 text-green-500 dark:text-green-200"
+            class="h-16 w-16 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -31,6 +31,7 @@
         <input
           v-for="(digit, index) in verifyCode"
           :key="index"
+          ref="codeInputs"
           type="text"
           inputmode="numeric"
           pattern="[0-9]*"
@@ -60,12 +61,12 @@
           <span v-else>Sending...</span>
         </button>
       </div>
-      <div v-if="authStore.signUpError" id="error" class="my-4 items-center bg-gray-200 p-4 rounded-lg text-justify dark:bg-gray-700">
-        <p class="text-green-500 text-sm text-center font-medium dark:text-green-500">
+      <div v-if="authStore.signUpError" id="error" class="my-4 items-center bg-red-50 border border-red-200 p-4 rounded-lg text-justify dark:bg-red-900/20 dark:border-red-800">
+        <p class="text-red-600 text-sm text-center font-medium dark:text-red-400">
           {{ authStore.signUpError }}
         </p>
       </div>
-      <ButtonSubmit :disabled="isVerifying" class="w-full my-4">
+      <ButtonSubmit :disabled="isVerifying || !isCodeComplete" class="w-full my-4" @click="verifyEmail">
         <span v-if="isVerifying">Loading...</span>
         <span v-else>Verify</span>
       </ButtonSubmit>
@@ -74,143 +75,142 @@
 </template>
 
 <script lang="ts" setup>
+import Swal from 'sweetalert2';
 import { useAuthStore } from '~/store/authStore';
 
-  definePageMeta({
-    layout: false,
-    middleware: 'authenticated'
-  });
+definePageMeta({
+  layout: false,
+  middleware: 'authenticated'
+});
 
-  const authStore = useAuthStore();
+const authStore = useAuthStore();
+const state = window.history.state
 
-  const fullname = ref('');
-  const username = ref('');
-  const email = ref('');
-  const password = ref('');
+// Get data from route query or state
+const action = ref(state?.action || '');
+const fullName = ref(state?.fullName || '');
+const username = ref(state?.username || '');
+const email = ref(state?.email || '');
+const password = ref(state?.password || '');
 
-  const verifyCode = ref(['', '', '', '', '', '']); // Array for 6 digits
-  const errors = ref({
-    verifyCode: '',
-  });
+const verifyCode = ref(['', '', '', '', '', '']); // Array for 6 digits
+const codeInputs = ref<HTMLInputElement[]>([]);
 
-  const isResending = ref(false);
-  const isVerifying = ref(false);
+const isResending = ref(false);
+const isVerifying = ref(false);
 
-  const getTempUser = async () => {
-    try {
-      const tempUser = await authStore.getTempUser();
-      fullname.value = tempUser.fullName;
-      username.value = tempUser.username;
-      email.value = tempUser.email;
-      password.value = tempUser.password;
+const isCodeComplete = computed(() => {
+  return verifyCode.value.every(digit => digit !== '');
+});
 
-      if (!email.value) {
-        navigateTo({ path: '/auth/sign-up' });
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        authStore.signUpError = error.message;
-      } else {
-        authStore.signUpError = 'An unexpected error occurred.';
-      }
-      console.error('Sign-up error:', error);
-    }
-  };
+// Disable the next input if the previous one is blank
+const isDisabled = (index: number) => {
+  if (index === 0) return false; // First input is always enabled
+  return verifyCode.value[index - 1] === ''; // Disable if the previous input is blank
+};
 
-  if (typeof window !== 'undefined') {
-    onMounted(() => {
-      getTempUser();
-    });
+const onInput = (index: number) => {
+  verifyCode.value[index] = verifyCode.value[index].replace(/[^0-9]/g, '');
+  if (verifyCode.value[index].length > 1) {
+    verifyCode.value[index] = verifyCode.value[index].slice(0, 1); // Ensure only one digit
+  }
+  if (index < verifyCode.value.length - 1 && verifyCode.value[index] !== '') {
+    // Move to the next input
+    const nextInput = codeInputs.value[index + 1];
+    nextInput?.focus();
   }
 
-  // Disable the next input if the previous one is blank
-  const isDisabled = (index: number) => {
-    if (index === 0) return false; // First input is always enabled
-    return verifyCode.value[index - 1] === ''; // Disable if the previous input is blank
-  };
+  // Check if all inputs are filled
+  if (isCodeComplete.value) {
+    verifyEmail(); // Automatically submit when all 6 digits are entered
+  }
+};
 
-  const onInput = (index: number) => {
-    verifyCode.value[index] = verifyCode.value[index].replace(/[^0-9]/g, '');
-    if (verifyCode.value[index].length > 1) {
-      verifyCode.value[index] = verifyCode.value[index].slice(0, 1); // Ensure only one digit
-    }
-    if (index < verifyCode.value.length - 1 && verifyCode.value[index] !== '') {
-      // Move to the next input
-      const nextInput = document.querySelectorAll('input')[index + 1] as HTMLInputElement;
-      nextInput?.focus();
+const onPaste = (event: ClipboardEvent) => {
+  const pastedData = event.clipboardData?.getData('text') || '';
+  if (/^\d{6}$/.test(pastedData)) {
+    // Ensure the pasted data is exactly 6 digits
+    for (let i = 0; i < verifyCode.value.length; i++) {
+      verifyCode.value[i] = pastedData[i] || ''; // Populate each input field
     }
 
-    // Check if all inputs are filled
-    if (verifyCode.value.every((digit) => digit !== '')) {
-      verifyEmail(); // Automatically submit when all 6 digits are entered
+    // Automatically submit if all inputs are filled
+    if (isCodeComplete.value) {
+      verifyEmail();
     }
-  };
+  }
+  event.preventDefault(); // Prevent the default paste behavior
+};
 
-  const onPaste = (event: ClipboardEvent) => {
-    const pastedData = event.clipboardData?.getData('text') || '';
-    if (/^\d{6}$/.test(pastedData)) {
-      // Ensure the pasted data is exactly 6 digits
-      for (let i = 0; i < verifyCode.value.length; i++) {
-        verifyCode.value[i] = pastedData[i] || ''; // Populate each input field
+const onBackspace = (index: number, event: KeyboardEvent) => {
+  if (event.key === 'Backspace' && verifyCode.value[index] === '' && index > 0) {
+    // Move to the previous input
+    const prevInput = codeInputs.value[index - 1];
+    prevInput?.focus();
+  }
+};
+
+const resendVerificationEmail = async () => {
+  try {
+    isResending.value = true;
+    authStore.signUpError = ''; // Clear previous errors
+
+    await authStore.sendVerifyCode(email.value);
+  } catch (error) {
+    if (error instanceof Error) {
+      authStore.signUpError = error.message;
+    } else {
+      authStore.signUpError = 'An unexpected error occurred.';
+    }
+    console.error('Resend verification error:', error);
+  } finally {
+    isResending.value = false;
+  }
+};
+
+const verifyEmail = async () => {
+  if (!isCodeComplete.value) return;
+  
+  try {
+    isVerifying.value = true;
+    authStore.signUpError = ''; // Clear previous errors
+
+    const code = verifyCode.value.join('');
+    
+    await authStore.verificationEmail(email.value, code);
+    if (action.value === 'sign-up') {
+      await authStore.signUp(fullName.value, username.value, email.value, password.value);
+    } else if (action.value === 'forgot-password') {
+      try {
+        const response = await authStore.forgotPassword(email.value);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message,
+          showConfirmButton: true,
+          ...getSwalTheme(),
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          authStore.signUpError = error.message;
+        } else {
+          authStore.signUpError = 'An unexpected error occurred.';
+        }
+        console.error('Reset password error:', error);
       }
-
-      // Automatically submit if all inputs are filled
-      if (verifyCode.value.every((digit) => digit !== '')) {
-        verifyEmail();
-      }
     }
-    event.preventDefault(); // Prevent the default paste behavior
-  };
 
-  const onBackspace = (index: number, event: KeyboardEvent) => {
-    if (event.key === 'Backspace' && verifyCode.value[index] === '' && index > 0) {
-      // Move to the previous input
-      const prevInput = document.querySelectorAll('input')[index - 1] as HTMLInputElement;
-      prevInput?.focus();
+    await navigateTo('/auth/sign-in');
+  } catch (error) {
+    if (error instanceof Error) {
+      authStore.signUpError = error.message;
+    } else {
+      authStore.signUpError = 'An unexpected error occurred.';
     }
-  };
-
-  const resendVerificationEmail = async () => {
-    try {
-      getTempUser();
-      isResending.value = true;
-
-      await authStore.sendVerifyCode(email.value);
-    } catch (error) {
-      if (error instanceof Error) {
-        authStore.signUpError = error.message;
-      } else {
-        authStore.signUpError = 'An unexpected error occurred.';
-      }
-      console.error('Sign-up error:', error);
-    } finally {
-      isResending.value = false;
-    }
-  };
-
-  const verifyEmail = async () => {
-    try {
-      getTempUser();
-      isVerifying.value = true;
-
-      const code = verifyCode.value.join('');
-      await authStore.verificationEmail(email.value, code);
-      // await authStore.signUp(username.value, fullname.value, email.value, password.value);
-
-      navigateTo({ path: '/auth/sign-in' });
-    } catch (error) {
-      if (error instanceof Error) {
-        authStore.signUpError = error.message;
-      } else {
-        authStore.signUpError = 'An unexpected error occurred.';
-      }
-      console.error('Sign-up error:', error);
-    } finally {
-      isVerifying.value = false;
-    }
-  };
+    console.error('Verification error:', error);
+  } finally {
+    isVerifying.value = false;
+  }
+};
 </script>
-
-<style>
-
-</style>

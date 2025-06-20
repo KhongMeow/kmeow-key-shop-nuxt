@@ -126,14 +126,14 @@
       if (result.isConfirmed) {
         try {
           isLoading.value = true;
-          await useApi(`/roles/${slug}`, {
+          const response = await useApi<{ status?: number, message?: string }>(`/roles/${slug}`, {
             method: 'DELETE',
           });
           data.value = data.value?.filter(item => item.slug !== slug) || [];
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Your roles has been deleted.',
+            text: response.message || 'This roles has been deleted.',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',
@@ -144,7 +144,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: err?.response?.data?.message || 'Unknown error',
+            text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',

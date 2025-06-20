@@ -169,9 +169,10 @@
       isChangingRole.value = true;
 
       try {
-        await useApi(`/users/change-role/${selectedUser.value.username}`, {
+        await useApi(`/users/change-role`, {
           method: 'POST',
           data: {
+            username: selectedUser.value.username,
             newRoleSlug: selectedRole.value,
           },
         });
@@ -243,8 +244,11 @@
       if (result.isConfirmed) {
         try {
           isLoading.value = true;
-          await useApi(`/users/reset-password/${username}`, {
+          await useApi(`/users/reset-password`, {
             method: 'POST',
+          data: {
+            username: username,
+          },
           });
           Swal.fire({
             icon: 'success',
@@ -299,14 +303,14 @@
       if (result.isConfirmed) {
         try {
           isLoading.value = true;
-          await useApi(`/users/${username}`, {
+          const response = await useApi<{ status?: number, message?: string }>(`/users/${username}`, {
             method: 'DELETE',
           });
           data.value = data.value?.filter(item => item.username !== username) || [];
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Your user has been deleted.',
+            text: response.message || 'This user has been deleted.',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',
@@ -317,7 +321,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: err?.response?.data?.message || 'Unknown error',
+            text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
             background: isDark ? '#1a202c' : '#fff',

@@ -22,36 +22,38 @@
         :error="errors.username"
       />
       <InputTextbox
-          label="Email"
-          type="email"
-          id="email"
-          ariaDescribedby="email-helper"
-          placeholder="Enter your email"
-          class="w-full mr-2"
-          v-model="email"
-          :error="errors.email"
-        />
-        <InputTextbox
-          label="Password"
-          type="password"
-          id="password"
-          ariaDescribedby="password-helper"
-          placeholder="Enter your password"
-          v-model="password"
-          :error="errors.password"
-        />
-        <InputTextbox
-          label="Confirm Password"
-          type="password"
-          id="confirm-password"
-          ariaDescribedby="confirm-password-helper"
-          placeholder="Enter your password again"
-          v-model="confirmPassword"
-          :error="errors.confirmPassword"
-        />
-      <div v-if="authStore.signUpError" id="error" class="my-4 bg-gray-200 p-4 rounded-lg text-justify dark:bg-gray-700">
-        <p class="text-red-500 text-sm font-medium dark:text-red-400">{{ authStore.signUpError }}</p>
+        label="Email"
+        type="email"
+        id="email"
+        ariaDescribedby="email-helper"
+        placeholder="Enter your email"
+        class="w-full mr-2"
+        v-model="email"
+        :error="errors.email"
+      />
+      <InputTextbox
+        label="Password"
+        type="password"
+        id="password"
+        ariaDescribedby="password-helper"
+        placeholder="Enter your password"
+        v-model="password"
+        :error="errors.password"
+      />
+      <InputTextbox
+        label="Confirm Password"
+        type="password"
+        id="confirm-password"
+        ariaDescribedby="confirm-password-helper"
+        placeholder="Enter your password again"
+        v-model="confirmPassword"
+        :error="errors.confirmPassword"
+      />
+      
+      <div v-if="error" id="error" class="my-4 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg text-center">
+        <p class="text-red-500 text-sm font-medium dark:text-red-400">{{ error }}</p>
       </div>
+
       <ButtonSubmit :disabled="isSigningUp" class="w-full my-4">
         <span v-if="isSigningUp">Loading...</span>
         <span v-else>Sign Up</span>
@@ -80,6 +82,7 @@ import { useAuthStore } from '~/store/authStore';
 
   const authStore = useAuthStore();
 
+  const error = ref('');
   const isSigningUp = ref(false);
 
   const errors = reactive({
@@ -180,14 +183,22 @@ import { useAuthStore } from '~/store/authStore';
       try {
         isSigningUp.value = true;
 
-        await authStore.createTempUser(fullName.value, username.value, email.value, password.value);
-
-        navigateTo('/auth/verification-email');
+        await authStore.sendVerifyCode(email.value);
+        navigateTo({
+          path: '/auth/verification-email',
+          state: {
+            action: 'sign-up',
+            fullName: fullName.value,
+            username: username.value,
+            email: email.value,
+            password: password.value,
+          }
+        });
       } catch (err) {
         if (err instanceof Error) {
-          authStore.signUpError = err.message;
+          error.value = err.message;
         } else {
-          authStore.signUpError = 'An unexpected error occurred.';
+          error.value = 'An unexpected error occurred.';
         }
         console.error('Sign-up error:', err);
       } finally {

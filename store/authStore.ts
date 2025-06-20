@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isChanging = ref<boolean>(false);
   const signInError = ref<string | null>(null);
   const signUpError = ref<string | null>(null);
+  const forgotPasswordError = ref<string | null>(null);
 
   if (process.client) {
     const storedToken = localStorage.getItem('access_token');
@@ -116,43 +117,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function createTempUser(fullName: string, username: string, email: string, password: string) {
-    signUpError.value = null;
-    try {
-      isLoading.value = true;
-
-      // Store user details in cookies for 10 minutes
-      const expirationTime = new Date(Date.now() + 10 * 60 * 1000).toUTCString();
-      document.cookie = `fullName=${encodeURIComponent(fullName)}; expires=${expirationTime}; path=/`;
-      document.cookie = `username=${encodeURIComponent(username)}; expires=${expirationTime}; path=/`;
-      document.cookie = `email=${encodeURIComponent(email)}; expires=${expirationTime}; path=/`;
-      document.cookie = `password=${encodeURIComponent(password)}; expires=${expirationTime}; path=/`;
-
-      // Send verification code to email
-      await sendVerifyCode(email);
-    } catch (error: any) {
-      signUpError.value = error instanceof Error ? error.message : String(error);
-      throw error;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function getTempUser() {
-    const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
-      const [name, value] = cookie.split('=');
-      acc[name] = decodeURIComponent(value);
-      return acc;
-    }, {} as Record<string, string>);
-
-    const fullName = cookies['fullName'] || '';
-    const username = cookies['username'] || '';
-    const email = cookies['email'] || '';
-    const password = cookies['password'] || '';
-
-    return { fullName, username, email, password };
-  }
-
   async function sendVerifyCode(email: string) {
     signUpError.value = '';
     try {
@@ -178,18 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
         data: { email, code },
       });
 
-      // After verification, get temp user and sign up
-      const tempUser = await getTempUser();
-      await signUp(tempUser.fullName, tempUser.username, tempUser.email, tempUser.password);
-
-      // Clear cookies after successful sign-up
-      document.cookie = 'fullName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-
-      // Redirect to sign-in page
-      navigateTo('/auth/sign-in');
+      return true;
     } catch (error: any) {
       signUpError.value = error?.response?.data?.message || (error instanceof Error ? error.message : String(error));
       throw error;
@@ -198,7 +151,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function forgotPassword(email: string) {
+    forgotPasswordError.value = '';
+    try {
+      isLoading.value = true;
+      const response = await useApi<{ message: string }>('/authentication/forgot-password', {
+        method: 'POST',
+        data: { email },
+      });
+      return response;
+    } catch (error: any) {
+      forgotPasswordError.value = error?.response?.data?.message || 'Failed to send reset password email';
+      throw new Error(forgotPasswordError.value || 'Failed to send reset password email');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   async function signUp(fullName: string, username: string, email: string, password: string) {
+    console.log('Signing up with:', { fullName, username, email, password });
+    
     signUpError.value = '';
     try {
       isLoading.value = true;
@@ -291,10 +263,9 @@ export const useAuthStore = defineStore('auth', () => {
     signInError,
     signUpError,
     signIn,
+    forgotPassword,
     signUp,
     signOut,
-    createTempUser,
-    getTempUser,
     sendVerifyCode,
     verificationEmail,
     getUser,

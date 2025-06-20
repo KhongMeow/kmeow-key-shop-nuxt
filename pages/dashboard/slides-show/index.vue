@@ -122,14 +122,14 @@
       if (result.isConfirmed) {
         try {
           isLoading.value = true;
-          await useApi(`/slides-show/${slug}`, {
+          const response = await useApi<{ status?: number, message?: string }>(`/slides-show/${slug}`, {
             method: 'DELETE',
           });
           data.value = data.value?.filter(item => item.slug !== slug) || [];
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Your slide show has been deleted.',
+            text: response.message || 'This slide show has been deleted.',
             timer: 2000,
             showConfirmButton: false,
             ...getSwalTheme(),
@@ -139,7 +139,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: err?.message || 'Unknown error',
+            text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
             ...getSwalTheme(),

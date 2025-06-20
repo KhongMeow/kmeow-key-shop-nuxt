@@ -122,14 +122,14 @@
       if (result.isConfirmed) {
         try {
           isLoading.value = true;
-          await useApi(`/categories/${slug}`, {
+          const response = await useApi<{ status?: number, message?: string }>(`/categories/${slug}`, {
             method: 'DELETE',
           });
           data.value = data.value?.filter(item => item.slug !== slug) || [];
           Swal.fire({
             icon: 'success',
             title: 'Deleted!',
-            text: 'Your categories has been deleted.',
+            text: response.message || 'This category has been deleted.',
             timer: 2000,
             showConfirmButton: false,
             ...getSwalTheme(),
@@ -139,7 +139,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error!',
-            text: err?.message || 'Unknown error',
+            text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
             timer: 2000,
             showConfirmButton: false,
             ...getSwalTheme(),

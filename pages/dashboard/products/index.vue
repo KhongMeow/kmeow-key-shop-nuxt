@@ -145,14 +145,15 @@ function deleteRow(slug: string) {
     if (result.isConfirmed) {
       try {
         isLoading.value = true;
-        await useApi(`/products/${slug}`, {
+        const response = await useApi<{ status?: number, message?: string }>(`/products/${slug}`, {
           method: 'DELETE',
         });
+
         data.value = data.value?.filter(item => item.slug !== slug) || [];
         Swal.fire({
           icon: 'success',
           title: 'Deleted!',
-          text: 'Your product has been deleted.',
+          text: response.message || 'Your product has been deleted.',
           timer: 2000,
           showConfirmButton: false,
           ...getSwalTheme(),
@@ -162,7 +163,7 @@ function deleteRow(slug: string) {
         Swal.fire({
           icon: 'error',
           title: 'Error!',
-          text: err?.message || 'Unknown error',
+          text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
           timer: 2000,
           showConfirmButton: false,
           ...getSwalTheme(),
