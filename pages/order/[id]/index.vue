@@ -443,8 +443,8 @@ function getOrderSteps(): OrderStep[] {
     {
       name: (() => {
         switch (status) {
-          case 'Delivered': return 'Successfully Delivered'
-          case 'Failed to Deliver': return 'Delivery Failed'
+          case 'Delivered': return 'Delivered'
+          case 'Failed to Deliver': return 'Failed to Deliver'
           default: return 'Delivery'
         }
       })(),
