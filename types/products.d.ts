@@ -9,5 +9,6 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  scaleRating: number;
   stock: number;
 }

@@ -37,6 +37,34 @@
                 >
                   {{ product?.name }}
                 </NuxtLink>
+                <div class="flex items-center gap-1 mt-1">
+                  <div class="flex">
+                    <div 
+                      v-for="star in 5" 
+                      :key="star"
+                      class="relative w-4 h-4"
+                    >
+                      <!-- Full star background (gray) -->
+                      <Icon 
+                        name="mdi:star" 
+                        class="absolute w-4 h-4 text-gray-500"
+                      />
+                      <!-- Filled star overlay -->
+                      <div 
+                        class="absolute overflow-hidden"
+                        :style="{ width: getStarWidth(star, product?.scaleRating || 0) }"
+                      >
+                        <Icon 
+                          name="mdi:star" 
+                          class="w-4 h-4 text-yellow-600"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-xs text-gray-600 dark:text-gray-400 ml-1">
+                    ({{ product?.scaleRating}})
+                  </span>
+                </div>
             </div>
             <h1 id="price" class="border-t-[0.1rem] border-t-[rgba(0,0,0,0.1)] text-[2rem] text-center font-bold p-2 mt-3 cursor-default text-black">
                 $ {{ product?.price }}
@@ -66,13 +94,24 @@
     if (!image) return '';
     return config.public.API_BASE_URL + image;
   }
+
+  const getStarWidth = (starIndex: number, rating: number) => {
+    if (rating >= starIndex) {
+      return '100%'; // Full star
+    } else if (rating > starIndex - 1) {
+      return `${(rating - (starIndex - 1)) * 100}%`; // Partial star
+    } else {
+      return '0%'; // Empty star
+    }
+  };
+
   onMounted(async () => {
     try {
       const slug = route.params.slug;
       const categoryResponce = await useApi<Category>(`/categories/${slug}`, {
         method: 'GET'
       });
-      const response = await useApi<Product[]>(`/products?categorySlug=${slug}&limit=24&order=name&direction=asc`, {
+      const response = await useApi<Product[]>(`/products?categorySlug=${slug}&limit=24&order=scaleRating&direction=desc`, {
         method: 'GET',
       });
 

@@ -297,14 +297,14 @@ function deleteRow(id: string) {
     if (result.isConfirmed) {
       try {
         isLoading.value = true;
-        await useApi(`/license-keys/${id}`, {
+        const response = await useApi<{ status?: number, message?: string }>(`/license-keys/${id}`, {
           method: 'DELETE',
         });
         data.value = data.value?.filter(item => item.id !== id) || [];
         Swal.fire({
           icon: 'success',
           title: 'Deleted!',
-          text: 'Your license key has been deleted.',
+          text: response?.message || 'This license key has been deleted.',
           timer: 2000,
           showConfirmButton: false,
           ...getSwalTheme(),
@@ -314,7 +314,7 @@ function deleteRow(id: string) {
         Swal.fire({
           icon: 'error',
           title: 'Error!',
-          text: err?.message || 'Unknown error',
+          text: err?.data?.message || err?.response?.data?.message || err?.message || 'Unknown error',
           timer: 2000,
           showConfirmButton: false,
           ...getSwalTheme(),
