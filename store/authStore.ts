@@ -89,7 +89,6 @@ export const useAuthStore = defineStore('auth', () => {
       accessToken.value = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
       return navigateTo('/auth/sign-in');
     }
   }
@@ -194,12 +193,9 @@ export const useAuthStore = defineStore('auth', () => {
         method: 'GET',
       });
       user.value = response;
-
-      localStorage.setItem('user', JSON.stringify(response));
     } catch (error) {
       console.error('Error fetching user:', error);
       user.value = null;
-      localStorage.removeItem('user');
       throw error;
     } finally {
       isLoading.value = false;
@@ -215,10 +211,6 @@ export const useAuthStore = defineStore('auth', () => {
       });
       if (response) {
         user.value = response;
-      }
-      if (response) {
-        user.value = response;
-        localStorage.setItem('user', JSON.stringify(response)); // Update localStorage
       }
       return response;
     } catch (error) {
