@@ -1,8 +1,7 @@
 <template>
   <div class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
-    <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'Categories' }}</h1>
-    </header>
+    <HeaderPageHead title="Categories" />
+    
     <div class="flex max-sm:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
         :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"

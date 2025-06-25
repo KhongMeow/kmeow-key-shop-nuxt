@@ -1,11 +1,11 @@
 <template>
   <form @submit.prevent="handleSubmit" class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
-    <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'Create Role Permissions' }}</h1>
-      <ButtonSubmit class="ml-auto" :disabled="isCreating">
-        {{ isCreating ? 'Creating...' : 'Create' }}
-      </ButtonSubmit>
-    </header>
+    <HeaderPageHead title="Create Role Permission" />
+
+    <ButtonSubmit class="ml-auto" :disabled="isCreating">
+      {{ isCreating ? 'Creating...' : 'Create' }}
+    </ButtonSubmit>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-3.5">
       <InputSelectBox
         label="Role"

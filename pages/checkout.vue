@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-xl font-bold py-4 mb-8">Checkout Page</h1>
+    <HeaderPageHead title="Checkout" />
 
     <div class="h-full mx-auto flex flex-col md:flex-row gap-8 items-start">
       <!-- Left: Email Input -->

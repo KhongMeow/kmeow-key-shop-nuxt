@@ -1,8 +1,7 @@
 <template>
   <div class="flex-1 divide-y divide-accented w-full">
-    <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'My Orders' }}</h1>
-    </header>
+    <HeaderPageHead title="My Orders" />
+    
     <div class="flex max-md:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <!-- Filter by Status -->
       <USelectMenu

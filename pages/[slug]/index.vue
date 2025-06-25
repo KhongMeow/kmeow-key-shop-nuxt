@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-xl font-bold py-4 mb-8">{{category?.name}}</h1>
+    <HeaderPageHead :title="category?.name ?? ''" />
 
     <div class="flex flex-wrap max-w-[80rem] w-[90%] gap-y-6 gap-x-4 mx-auto justify-center">
       <div 

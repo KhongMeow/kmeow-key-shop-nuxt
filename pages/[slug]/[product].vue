@@ -114,21 +114,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Image Gallery Thumbnails - Responsive -->
-            <div class="flex gap-2 sm:gap-3 lg:gap-4 justify-center">
-              <div 
-                v-for="i in 3" 
-                :key="i"
-                class="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg sm:rounded-xl border border-transparent hover:border-indigo-400 transition-all duration-300 cursor-pointer hover:scale-110"
-              >
-                <img 
-                  :src="getImageUrl(product.image)" 
-                  :alt="`${product.name} thumbnail ${i}`"
-                  class="w-full h-full object-cover rounded-lg opacity-60 hover:opacity-100 transition-opacity"
-                />
-              </div>
-            </div>
           </div>
 
           <!-- Product Information Section - Responsive -->

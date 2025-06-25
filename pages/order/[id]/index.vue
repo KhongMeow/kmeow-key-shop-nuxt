@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto py-6 sm:py-8 lg:py-12">
+    <div class="py-6 sm:py-8 lg:py-12">
       <!-- Header with back button -->
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <button @click="$router.back()" class="flex group p-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105 self-start">

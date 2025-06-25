@@ -1,8 +1,6 @@
 <template>
   <div class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
-    <header class="flex items-center justify-between border-b border-default p-4">
-      <h1 class="text-xl font-bold">{{ 'Dashboard' }}</h1>
-    </header>
+    <HeaderPageHead title="Dashboard" />
     <div class="flex-1 max-md:flex-col items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <USelectMenu
         v-model="selectedGroup"
