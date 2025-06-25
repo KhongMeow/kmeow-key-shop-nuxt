@@ -9,7 +9,7 @@
         </div>
       </div>
       <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-transparent mb-3">
-        Loading Amazing Product
+        Loading Amazing Website...
       </h2>
       <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base lg:text-lg">Preparing something special for you...</p>
       <div class="mt-4 sm:mt-6 flex justify-center gap-2">
