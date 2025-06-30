@@ -1,5 +1,8 @@
 <template>
   <div class="h-full bg-gray-200 dark:bg-gray-900 dark:text-white min-h-screen relative overflow-hidden">
+    <!-- Background Pattern -->
+    <!-- <div class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(139,92,246,0.15)_1px,transparent_0)] [background-size:20px_20px] dark:bg-[radial-gradient(circle_at_1px_1px,rgba(139,92,246,0.1)_1px,transparent_0)]"></div> -->
+    
     <!-- Animated Background Elements -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
