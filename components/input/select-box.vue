@@ -1,175 +1,324 @@
 <template>
-  <div class="mb-6 relative">
-    <label v-if="label" class="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
+  <div class="group relative mb-2">
+    <!-- Floating Label -->
+    <label 
+      :for="id" 
+      :class="labelClasses"
+    >
       {{ label }}
+      <span v-if="required" class="text-red-500 ml-1">*</span>
     </label>
     
-    <!-- Search Input -->
-    <div class="relative group">
-      <input
-        ref="searchInput"
-        type="text"
-        v-model="searchTerm"
-        :placeholder="selectedOption?.label || placeholder || 'Search or select an option...'"
-        class="w-full px-4 py-3 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl shadow-sm transition-all duration-200 ease-in-out placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-gray-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 dark:hover:border-gray-500 dark:focus:ring-blue-500"
-        :class="{
-          'pr-12': true,
-          'ring-2 ring-blue-500 border-transparent': isOpen,
-          'border-red-300 focus:ring-red-500 dark:border-red-600': error
-        }"
-        @focus="openDropdown"
-        @blur="closeDropdown"
-        @input="filterOptions"
-      />
+    <!-- Main Select Container -->
+    <div class="relative">
+      <!-- Select Trigger -->
+      <div
+        :id="id"
+        ref="selectTrigger"
+        :class="inputClasses"
+        :tabindex="disabled ? -1 : 0"
+        @click="toggleDropdown"
+        @keydown="handleKeydown"
+        @focus="handleFocus"
+        @blur="handleBlur"
+        role="combobox"
+        :aria-expanded="isOpen"
+        :aria-haspopup="true"
+        :aria-label="label"
+      >
+        <!-- Display selected value or placeholder -->
+        <span 
+          v-if="selectedOption" 
+          :class="selectedTextClasses"
+        >
+          {{ selectedOption.label }}
+        </span>
+        <span 
+          v-else
+          :class="placeholderTextClasses"
+        >
+          {{ (isOpen || isFocused) ? placeholder : '\u00A0' }}
+        </span>
+      </div>
       
-      <!-- Dropdown Arrow -->
-      <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-        <Icon 
-          name="heroicons:chevron-down-20-solid"
-          class="w-5 h-5 text-gray-400 transition-all duration-300 ease-in-out group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300"
-          :class="{ 'rotate-180 text-blue-500 dark:text-blue-400': isOpen }"
-        />
-      </div>
+      <!-- Right Side Icons -->
+      <div class="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+        <!-- Clear Button -->
+        <button
+          v-if="internalValue && !loading && !disabled"
+          type="button"
+          class="flex items-center justify-center mr-2 p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-all duration-200 pointer-events-auto"
+          @click.stop="clearSelection"
+        >
+          <Icon name="heroicons:x-mark-20-solid" class="w-4 h-4" />
+        </button>
 
-      <!-- Loading indicator -->
-      <div v-if="loading" class="absolute inset-y-0 right-12 flex items-center pr-2">
-        <Icon 
-          name="eos-icons:loading"
-          class="w-4 h-4 text-blue-500"
-        />
+        <!-- Loading indicator -->
+        <div v-if="loading" class="mr-2 p-1">
+          <Icon name="eos-icons:loading" class="w-4 h-4 text-blue-500 animate-spin" />
+        </div>
+        
+        <!-- Dropdown Arrow -->
+        <div class="flex items-center justify-center mr-3 p-1">
+          <Icon 
+            name="heroicons:chevron-down-20-solid"
+            class="w-4 h-4 transition-all duration-300"
+            :class="[
+              error ? 'text-red-400' : isOpen ? 'text-blue-500' : 'text-gray-400',
+              { 'rotate-180': isOpen }
+            ]"
+          />
+        </div>
       </div>
+      
+      <!-- Focus Border Animation -->
+      <div 
+        :class="[
+          'absolute inset-0 rounded-xl border-2 transition-all duration-300 pointer-events-none',
+          isOpen && !error ? 'border-blue-500' : 'border-transparent'
+        ]"
+      />
     </div>
 
     <!-- Dropdown Menu -->
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="transform scale-95 opacity-0"
-      enter-to-class="transform scale-100 opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="transform scale-100 opacity-100"
-      leave-to-class="transform scale-95 opacity-0"
-    >
+    <Teleport to="body">
       <div
-        v-show="isOpen"
-        class="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl dark:bg-gray-800 dark:border-gray-600 backdrop-blur-sm overflow-hidden"
-        :style="{ width: dropdownWidth + 'px' }"
+        v-if="isOpen"
+        ref="dropdown"
+        class="fixed z-[9999] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-2xl"
+        :style="dropdownStyle"
       >
+        <!-- Search Input -->
+        <div class="p-3 border-b border-gray-100 dark:border-gray-800">
+          <div class="relative">
+            <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              ref="searchInput"
+              v-model="searchTerm"
+              type="text"
+              placeholder="Search options..."
+              class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              @input="filterOptions"
+              @keydown="handleSearchKeydown"
+            />
+          </div>
+        </div>
+
         <!-- Search Results Header -->
-        <div v-if="searchTerm && filteredOptions.length > 0" class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+        <div 
+          v-if="searchTerm && filteredOptions.length > 0" 
+          class="px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 border-b border-blue-100 dark:border-blue-900/30 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10"
+        >
+          <Icon name="heroicons:magnifying-glass" class="w-3 h-3 inline mr-2" />
           {{ filteredOptions.length }} result{{ filteredOptions.length !== 1 ? 's' : '' }} found
         </div>
 
-        <div class="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent dark:scrollbar-thumb-gray-600">
+        <div class="max-h-60 overflow-y-auto custom-scrollbar">
           <!-- No results message -->
           <div
             v-if="filteredOptions.length === 0"
-            class="px-4 py-8 text-center"
+            class="px-6 py-8 text-center"
           >
-            <div class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600 flex items-center justify-center">
-              <Icon 
-                name="heroicons:magnifying-glass-20-solid"
-                class="w-8 h-8"
-              />
+            <div class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-full">
+              <Icon name="heroicons:magnifying-glass" class="w-6 h-6" />
             </div>
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">No options found</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Try adjusting your search term</p>
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">No options found</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Try adjusting your search term</p>
           </div>
           
           <!-- Options list -->
-          <div
-            v-for="(option, index) in filteredOptions"
-            :key="option.value"
-            class="px-4 py-3 text-sm cursor-pointer transition-all duration-150 ease-in-out flex items-center justify-between group relative hover:overflow-hidden"
-            :class="{
-              'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300': option.value === internalValue,
-              'text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700': option.value !== internalValue,
-              'border-b border-gray-100 dark:border-gray-700': index < filteredOptions.length - 1
-            }"
-            @mousedown.prevent="selectOption(option)"
-          >
-            <span class="flex-1 font-medium">{{ option.label }}</span>
-            
-            <!-- Selected indicator -->
+          <div class="py-1">
             <div
-              v-if="option.value === internalValue"
-              class="flex items-center ml-3"
+              v-for="(option, index) in filteredOptions"
+              :key="option.value"
+              class="px-4 py-3 text-sm cursor-pointer transition-all duration-200 ease-out flex items-center justify-between group rounded m-1"
+              :class="{
+                'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300': option.value === internalValue,
+                'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800': option.value !== internalValue,
+                'bg-gray-100 dark:bg-gray-700': highlightedIndex === index && option.value !== internalValue
+              }"
+              @click="selectOption(option)"
+              @mouseenter="highlightedIndex = index"
             >
-              <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-              <Icon 
-                name="heroicons:check-20-solid"
-                class="w-4 h-4 text-blue-500 dark:text-blue-400"
+              <span class="flex-1 font-medium truncate pr-3">{{ option.label }}</span>
+              
+              <!-- Selected indicator -->
+              <Icon
+                v-if="option.value === internalValue"
+                name="heroicons:check"
+                class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0"
               />
             </div>
           </div>
         </div>
 
         <!-- Footer with keyboard shortcuts hint -->
-        <div v-if="filteredOptions.length > 0" class="px-4 py-2 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl flex items-center">
-          <Icon 
-            name="heroicons:information-circle-20-solid"
-            class="w-3 h-3 mr-1"
-          />
-          Use ↑↓ arrows to navigate, Enter to select, Escape to close
+        <div 
+          v-if="filteredOptions.length > 0" 
+          class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-between"
+        >
+          <div class="flex items-center">
+            <Icon name="heroicons:command-line" class="w-3 h-3 mr-1.5" />
+            <span class="font-medium">Keyboard shortcuts</span>
+          </div>
+          <div class="flex items-center space-x-3 text-xs">
+            <span class="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border text-gray-600 dark:text-gray-300">↑↓</span>
+            <span class="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border text-gray-600 dark:text-gray-300">⏎</span>
+            <span class="bg-white dark:bg-gray-700 px-1.5 py-0.5 rounded border text-gray-600 dark:text-gray-300">Esc</span>
+          </div>
         </div>
       </div>
-    </Transition>
+    </Teleport>
 
-    <!-- Error message with icon -->
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="transform translate-y-1 opacity-0"
-      enter-to-class="transform translate-y-0 opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="transform translate-y-0 opacity-100"
-      leave-to-class="transform translate-y-1 opacity-0"
-    >
-      <div v-if="error" class="flex items-center mt-2 text-red-600 dark:text-red-400">
-        <Icon 
-          name="heroicons:exclamation-circle-20-solid"
-          class="w-4 h-4 mr-2 flex-shrink-0"
-        />
-        <p class="text-sm font-medium">{{ error }}</p>
-      </div>
-    </Transition>
+    <!-- Bottom Section -->
+    <div v-if="error || helpText" class="mt-2 min-h-[20px]">
+      <!-- Error Message -->
+      <Transition name="error" mode="out-in">
+        <div v-if="error" class="flex items-start gap-2 text-red-500 animate-shake">
+          <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span class="text-sm font-medium">{{ error }}</span>
+        </div>
+        <!-- Help Text -->
+        <div v-else-if="helpText" class="flex items-start gap-2 text-gray-500 dark:text-gray-400">
+          <Icon name="heroicons:information-circle" class="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span class="text-sm">{{ helpText }}</span>
+        </div>
+      </Transition>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits, ref, watch, computed, nextTick, onMounted } from 'vue'
+import { defineProps, defineEmits, ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   modelValue: String,
-  label: { type: String },
-  placeholder: { type: String },
+  label: {
+    type: String,
+    required: true
+  },
+  id: {
+    type: String,
+    required: true
+  },
+  placeholder: {
+    type: String,
+    default: 'Select an option...'
+  },
   options: {
     type: Array as () => Array<{ value: string, label: string }>,
     default: () => []
   },
-  error: { type: String },
-  loading: { type: Boolean, default: false }
+  error: {
+    type: String,
+    default: ''
+  },
+  helpText: {
+    type: String,
+    default: ''
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  required: {
+    type: Boolean,
+    default: false
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'focus', 'blur'])
 
 const internalValue = ref(props.modelValue)
 const searchTerm = ref('')
 const isOpen = ref(false)
+const isFocused = ref(false)
+const selectTrigger = ref<HTMLDivElement>()
+const dropdown = ref<HTMLDivElement>()
 const searchInput = ref<HTMLInputElement>()
+const highlightedIndex = ref(-1)
 
-// Dropdown width and position
-const dropdownWidth = ref(0)
+// Dropdown positioning
+const dropdownStyle = ref({})
 
-function updateDropdownPosition() {
-  if (searchInput.value) {
-    const rect = searchInput.value.getBoundingClientRect()
-    dropdownWidth.value = rect.width
-  }
-}
+const hasContent = computed(() => internalValue.value && internalValue.value.length > 0)
 
 // Computed property to get the selected option
 const selectedOption = computed(() => {
   return props.options.find(option => option.value === internalValue.value)
 })
+
+// Selected text classes
+const selectedTextClasses = computed(() => [
+  'block truncate font-medium',
+  props.error 
+    ? 'text-red-700 dark:text-red-300'
+    : props.disabled
+      ? 'text-gray-400 dark:text-gray-500'
+      : 'text-gray-900 dark:text-white'
+])
+
+// Placeholder text classes
+const placeholderTextClasses = computed(() => [
+  'block truncate',
+  props.error 
+    ? 'text-red-400 dark:text-red-500'
+    : props.disabled
+      ? 'text-gray-300 dark:text-gray-600'
+      : 'text-gray-400 dark:text-gray-500'
+])
+
+// Floating label classes
+const labelClasses = computed(() => [
+  'absolute left-4 transition-all duration-300 ease-out pointer-events-none select-none',
+  'text-sm font-medium z-10',
+  (hasContent.value || isFocused.value || isOpen.value) ? [
+    '-top-2.5 text-xs px-2 py-0.5 rounded-md',
+    'bg-white dark:bg-gray-900',
+    props.error 
+      ? 'text-red-600 dark:text-red-400' 
+      : (isFocused.value || isOpen.value)
+        ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        : 'text-gray-600 dark:text-gray-300'
+  ] : [
+    'top-3.5',
+    props.error 
+      ? 'text-red-500 dark:text-red-400'
+      : 'text-gray-500 dark:text-gray-400'
+  ]
+])
+
+// Input classes
+const inputClasses = computed(() => [
+  'w-full px-4 py-3.5 pr-20 text-sm transition-all duration-300 ease-out cursor-pointer',
+  'border-2 rounded-xl outline-none',
+  'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm',
+  'leading-relaxed',
+  
+  // State-based styling
+  props.error ? [
+    'border-red-300 dark:border-red-600',
+    'hover:border-red-400 dark:hover:border-red-500',
+    'focus:border-red-500 dark:focus:border-red-400',
+    'bg-red-50/50 dark:bg-red-900/10'
+  ] : props.disabled ? [
+    'border-gray-200 dark:border-gray-700',
+    'bg-gray-50/50 dark:bg-gray-800/50',
+    'cursor-not-allowed opacity-60'
+  ] : (isFocused.value || isOpen.value) ? [
+    'border-blue-300 dark:border-blue-600',
+    'bg-white dark:bg-gray-900',
+    'shadow-sm'
+  ] : [
+    'border-gray-200 dark:border-gray-700',
+    'hover:border-gray-300 dark:hover:border-gray-600',
+    'focus:border-blue-300 dark:focus:border-blue-600'
+  ]
+])
 
 // Filtered options based on search term
 const filteredOptions = computed(() => {
@@ -181,91 +330,240 @@ const filteredOptions = computed(() => {
   )
 })
 
+// Calculate dropdown position
+const calculateDropdownPosition = () => {
+  if (!selectTrigger.value) return
+
+  const rect = selectTrigger.value.getBoundingClientRect()
+  const viewportHeight = window.innerHeight
+  const dropdownHeight = 300 // approximate max height
+  
+  const spaceBelow = viewportHeight - rect.bottom
+  const spaceAbove = rect.top
+  
+  // Position dropdown below if there's space, otherwise above
+  const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+  
+  dropdownStyle.value = {
+    left: `${rect.left}px`,
+    top: shouldPositionAbove ? `${rect.top - Math.min(dropdownHeight, spaceAbove - 10)}px` : `${rect.bottom + 4}px`,
+    width: `${rect.width}px`,
+    maxHeight: `${Math.min(dropdownHeight, shouldPositionAbove ? spaceAbove - 10 : spaceBelow - 10)}px`
+  }
+}
+
 // Watch for external value changes
 watch(() => props.modelValue, (val) => {
   internalValue.value = val
-  updateSearchTerm()
 })
 
 // Watch for dropdown open to update position
 watch(isOpen, (val) => {
   if (val) {
-    nextTick(updateDropdownPosition)
+    calculateDropdownPosition()
+    nextTick(() => {
+      searchInput.value?.focus()
+    })
+    highlightedIndex.value = -1
+  } else {
+    searchTerm.value = ''
+    highlightedIndex.value = -1
   }
 })
 
-// Update search term when value changes
-function updateSearchTerm() {
-  if (!isOpen.value) {
-    searchTerm.value = selectedOption.value?.label || ''
+function toggleDropdown() {
+  if (props.disabled) return
+  isOpen.value = !isOpen.value
+}
+
+function handleFocus() {
+  if (props.disabled) return
+  isFocused.value = true
+  emit('focus')
+}
+
+function handleBlur() {
+  // Delay blur to allow for click events
+  setTimeout(() => {
+    isFocused.value = false
+  }, 150)
+  emit('blur')
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  switch (event.key) {
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      if (!isOpen.value) {
+        toggleDropdown()
+      } else if (highlightedIndex.value >= 0 && filteredOptions.value[highlightedIndex.value]) {
+        selectOption(filteredOptions.value[highlightedIndex.value])
+      }
+      break
+    case 'Escape':
+      event.preventDefault()
+      isOpen.value = false
+      selectTrigger.value?.focus()
+      break
+    case 'ArrowDown':
+      event.preventDefault()
+      if (!isOpen.value) {
+        toggleDropdown()
+      } else {
+        highlightedIndex.value = Math.min(highlightedIndex.value + 1, filteredOptions.value.length - 1)
+      }
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      if (isOpen.value) {
+        highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
+      }
+      break
   }
 }
 
-function openDropdown() {
-  isOpen.value = true
-  searchTerm.value = ''
-  nextTick(() => {
-    searchInput.value?.focus()
-    updateDropdownPosition()
-  })
-}
-
-function closeDropdown() {
-  setTimeout(() => {
-    isOpen.value = false
-    updateSearchTerm()
-  }, 150)
+function handleSearchKeydown(event: KeyboardEvent) {
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      highlightedIndex.value = Math.min(highlightedIndex.value + 1, filteredOptions.value.length - 1)
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
+      break
+    case 'Enter':
+      event.preventDefault()
+      if (highlightedIndex.value >= 0 && filteredOptions.value[highlightedIndex.value]) {
+        selectOption(filteredOptions.value[highlightedIndex.value])
+      }
+      break
+    case 'Escape':
+      event.preventDefault()
+      isOpen.value = false
+      selectTrigger.value?.focus()
+      break
+  }
 }
 
 function filterOptions() {
-  // The filtering is handled by the computed property
+  highlightedIndex.value = -1
 }
 
 function selectOption(option: { value: string, label: string }) {
   internalValue.value = option.value
-  searchTerm.value = option.label
   isOpen.value = false
-  searchInput.value?.blur()
   emit('update:modelValue', option.value)
+  selectTrigger.value?.focus()
 }
 
-// Initialize search term
-updateSearchTerm()
+function clearSelection() {
+  internalValue.value = ''
+  emit('update:modelValue', '')
+}
+
+// Close dropdown when clicking outside
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as Element
+  if (
+    !selectTrigger.value?.contains(target) &&
+    !dropdown.value?.contains(target)
+  ) {
+    isOpen.value = false
+  }
+}
 
 onMounted(() => {
-  updateDropdownPosition()
-  window.addEventListener('resize', updateDropdownPosition)
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', () => {
+    if (isOpen.value) {
+      calculateDropdownPosition()
+    }
+  })
+  window.addEventListener('scroll', () => {
+    if (isOpen.value) {
+      calculateDropdownPosition()
+    }
+  })
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
 <style scoped>
-/* Custom scrollbar styles */
-.scrollbar-thin {
-  scrollbar-width: thin;
+/* Smooth animations */
+.error-enter-active,
+.error-leave-active {
+  transition: all 0.3s ease;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
+.error-enter-from,
+.error-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.6s ease-in-out;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+.custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgb(209 213 219);
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgb(148 163 184), rgb(100 116 139));
   border-radius: 3px;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgb(75 85 99);
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgb(100 116 139), rgb(71 85 105));
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(156 163 175);
+/* Dark mode scrollbar */
+.dark .custom-scrollbar {
+  scrollbar-color: rgb(75 85 99) transparent;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128);
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgb(75 85 99), rgb(55 65 81));
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgb(107 114 128), rgb(75 85 99));
+}
+
+/* Loading animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 </style>

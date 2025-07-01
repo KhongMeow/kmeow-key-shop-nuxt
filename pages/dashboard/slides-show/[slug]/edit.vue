@@ -46,114 +46,29 @@
           <!-- Form Content -->
           <div class="p-6 space-y-6">
             <!-- Title Input -->
-            <div class="space-y-2">
-              <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title <span class="text-red-500">*</span>
-              </label>
-              <div class="relative">
-                <Icon 
-                  name="heroicons:tag" 
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                />
-                <input
-                  id="title"
-                  v-model="title"
-                  type="text"
-                  placeholder="Enter an engaging title for your slide show"
-                  class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         transition-all duration-200 ease-in-out
-                         placeholder-gray-500 dark:placeholder-gray-400"
-                  :class="{ 'border-red-500 focus:ring-red-500': errors.title }"
-                />
-              </div>
-              <p v-if="errors.title" class="text-sm text-red-500 flex items-center gap-1">
-                <Icon name="heroicons:exclamation-circle" class="w-4 h-4" />
-                {{ errors.title }}
-              </p>
-            </div>
+            <InputTextbox
+              id="title"
+              v-model="title"
+              label="Title"
+              placeholder="Enter an engaging title for your slide show"
+              icon="heroicons:tag"
+              :error="errors.title"
+              :required="true"
+            />
 
             <!-- Image Upload -->
-            <div class="space-y-2">
-              <label for="slide-image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Slide Image <span class="text-gray-500">(Optional)</span>
-              </label>
-              <div class="relative">
-                <div 
-                  class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8
-                         hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200
-                         bg-gray-50 dark:bg-gray-700/50"
-                  :class="{ 'border-red-500': errors.slideImage }"
-                >
-                  <!-- No image state -->
-                  <div v-if="!slideImage && !imageUrl" class="text-center">
-                    <Icon name="heroicons:photo" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      Drop your image here or click to browse
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-500">
-                      JPG, JPEG, PNG up to 5MB
-                    </p>
-                  </div>
-                  
-                  <!-- Existing image state -->
-                  <div v-else-if="!slideImage && imageUrl" class="text-center">
-                    <div class="relative inline-block">
-                      <img 
-                        :src="imageUrl" 
-                        alt="Current slide image" 
-                        class="max-w-full max-h-48 rounded-lg shadow-md"
-                      />
-                      <button
-                        type="button"
-                        @click="removeExistingImage"
-                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
-                               hover:bg-red-600 transition-colors duration-200 flex items-center justify-center"
-                      >
-                        <Icon name="heroicons:x-mark" class="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Current image</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-500">
-                      Upload a new image to replace this one
-                    </p>
-                  </div>
-                  
-                  <!-- New image selected state -->
-                  <div v-else class="text-center">
-                    <div class="relative inline-block">
-                      <img 
-                        :src="getImagePreview(slideImage!)" 
-                        alt="Preview" 
-                        class="max-w-full max-h-48 rounded-lg shadow-md"
-                      />
-                      <button
-                        type="button"
-                        @click="removeNewImage"
-                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
-                               hover:bg-red-600 transition-colors duration-200 flex items-center justify-center"
-                      >
-                        <Icon name="heroicons:x-mark" class="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ slideImage!.name }}</p>
-                  </div>
-                  
-                  <input
-                    id="slide-image"
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png"
-                    @change="handleImageChange"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                </div>
-              </div>
-              <p v-if="errors.slideImage" class="text-sm text-red-500 flex items-center gap-1">
-                <Icon name="heroicons:exclamation-circle" class="w-4 h-4" />
-                {{ errors.slideImage }}
-              </p>
-            </div>
+            <InputImage
+              id="slide-image"
+              v-model="slideImage"
+              label="Slide Image"
+              rule="JPG, JPEG, PNG up to 5MB"
+              :error="errors.slideImage"
+              :preview="imageUrl"
+              :max-size="5 * 1024 * 1024"
+              :allowed-types="['image/jpeg', 'image/jpg', 'image/png']"
+              @error="errors.slideImage = $event"
+              :required="true"
+            />
           </div>
         </div>
 

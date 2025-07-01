@@ -47,6 +47,7 @@
             />
             <!-- Image Upload -->
             <InputImage
+              id="slideImage"
               v-model="slideImage"
               label="Slide Image"
               rule="JPG, JPEG, PNG up to 5MB"

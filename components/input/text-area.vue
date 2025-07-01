@@ -1,5 +1,5 @@
 <template>
-  <div class="group relative mb-6">
+  <div class="group relative mb-2">
     <!-- Floating Label -->
     <label 
       :for="id" 
@@ -29,7 +29,7 @@
     </div>
     
     <!-- Bottom Section -->
-    <div class="mt-2 min-h-[20px]">
+    <div v-if="error || helpText" class="mt-2 min-h-[20px]">
       <!-- Error Message -->
       <Transition name="error" mode="out-in">
         <div v-if="error" class="flex items-start gap-2 text-red-500 animate-shake">
@@ -141,7 +141,7 @@ const labelClasses = computed(() => [
     '-top-2.5 text-xs px-2 py-0.5 rounded-md',
     'bg-white dark:bg-gray-900',
     props.error 
-      ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20' 
+      ? 'text-red-600 dark:text-red-400 bg-white dark:bg-gray-900' 
       : isFocused.value
         ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
         : 'text-gray-600 dark:text-gray-300'
@@ -177,8 +177,7 @@ const textareaClasses = computed(() => [
   props.error ? [
     'border-red-300 dark:border-red-600',
     'focus:border-red-500 dark:focus:border-red-400',
-    'bg-red-50/50 dark:bg-red-900/10',
-    'shadow-sm shadow-red-100 dark:shadow-red-900/20'
+    'bg-red-50/50 dark:bg-red-900/10'
   ] : props.disabled ? [
     'border-gray-200 dark:border-gray-700',
     'bg-gray-50/50 dark:bg-gray-800/50',
@@ -186,12 +185,10 @@ const textareaClasses = computed(() => [
     'cursor-not-allowed opacity-60'
   ] : isFocused.value ? [
     'border-blue-300 dark:border-blue-600',
-    'shadow-lg shadow-blue-100/50 dark:shadow-blue-900/20',
     'bg-white dark:bg-gray-900'
   ] : [
     'border-gray-200 dark:border-gray-700',
     'hover:border-gray-300 dark:hover:border-gray-600',
-    'hover:shadow-md hover:shadow-gray-100/50 dark:hover:shadow-gray-800/20',
     'focus:border-blue-300 dark:focus:border-blue-600'
   ]
 ])
