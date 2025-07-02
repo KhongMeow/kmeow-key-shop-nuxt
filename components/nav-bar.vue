@@ -70,7 +70,7 @@
                         type="number"
                         min="0"
                         step="1"
-                        @update:model-value="val => changeItemQuantity(item, val)"
+                        @update:model-value="(val: string | number) => changeItemQuantity(item, val)"
                         class="max-w-[5rem] text-center items-center"
                       />
                       <button

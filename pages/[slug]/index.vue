@@ -1,191 +1,252 @@
 <template>
-  <div class="min-h-screen">
-    <div class="container mx-auto py-6 relative z-10">
-      <!-- Enhanced Loading State -->
-      <div v-if="isLoading" class="flex justify-center items-center min-h-[80vh]">
-        <div class="text-center px-4">
-          <div class="relative mb-8">
-            <div class="w-32 h-32 mx-auto">
-              <div class="absolute inset-0 w-32 h-32 border-8 border-transparent border-t-violet-500 border-r-purple-500 rounded-full animate-spin shadow-lg"></div>
-              <div class="absolute inset-2 w-28 h-28 border-6 border-transparent border-t-pink-400 border-l-cyan-400 rounded-full animate-spin shadow-md" style="animation-direction: reverse; animation-duration: 1.5s"></div>
-              <div class="absolute inset-6 w-20 h-20 border-4 border-transparent border-t-yellow-400 border-b-green-400 rounded-full animate-spin" style="animation-duration: 2s"></div>
+  <div class="container mx-auto py-6 relative z-10">
+    <!-- Enhanced Loading State -->
+    <div v-if="isLoading" class="flex justify-center items-center min-h-[80vh]">
+      <div class="text-center px-4">
+        <div class="relative mb-8">
+          <div class="w-32 h-32 mx-auto">
+            <div class="absolute inset-0 w-32 h-32 border-8 border-transparent border-t-violet-500 border-r-purple-500 rounded-full animate-spin shadow-lg"></div>
+            <div class="absolute inset-2 w-28 h-28 border-6 border-transparent border-t-pink-400 border-l-cyan-400 rounded-full animate-spin shadow-md" style="animation-direction: reverse; animation-duration: 1.5s"></div>
+            <div class="absolute inset-6 w-20 h-20 border-4 border-transparent border-t-yellow-400 border-b-green-400 rounded-full animate-spin" style="animation-duration: 2s"></div>
+          </div>
+        </div>
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          Loading Amazing Products
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 text-lg">Discovering the perfect items for you...</p>
+        <div class="mt-6 flex justify-center gap-2">
+          <div class="w-3 h-3 bg-violet-500 rounded-full animate-bounce shadow-lg"></div>
+          <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.1s"></div>
+          <div class="w-3 h-3 bg-pink-500 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.2s"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Breadcrumb -->
+    <div v-else-if="products" class="max-w-8xl mx-auto">
+      <nav class="mb-12 relative group">
+        <div class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-gray-700/60 shadow-xl group-hover:shadow-2xl transition-all duration-300"></div>
+        <ol class="flex items-center space-x-4 px-6 py-4 relative z-10">
+          <li>
+            <NuxtLink 
+              to="/" 
+              class="group/link flex items-center text-gray-700 hover:text-violet-600 dark:text-gray-300 dark:hover:text-violet-400 transition-all duration-300"
+            >
+              <Icon name="mdi:home-variant" class="w-5 h-5 mr-2 group-hover/link:scale-110 transition-transform" />
+              <span class="font-medium group-hover/link:font-semibold">Home</span>
+            </NuxtLink>
+          </li>
+          <li><Icon name="mdi:chevron-right" class="w-5 h-5 text-gray-400" /></li>
+          <li>
+            <span class="text-violet-600 dark:text-violet-400 font-semibold">
+              {{ category?.name }}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Category Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          {{ category?.name }}
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          Discover our curated collection of premium products
+        </p>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
+        <div 
+          v-for="product in products"
+          :key="product.slug"
+          class="group relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-gray-100 dark:border-gray-700"
+        >
+          <!-- Sold Out Overlay -->
+          <div v-if="product?.stock === 0" class="absolute z-20 inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center rounded-3xl">
+            <div class="text-center">
+              <Icon name="mdi:package-variant-closed" class="w-16 h-16 text-red-400 mx-auto mb-2" />
+              <p class="text-white text-xl font-bold">Sold Out</p>
             </div>
           </div>
-          <h2 class="text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            Loading Amazing Products
-          </h2>
-          <p class="text-gray-600 dark:text-gray-400 text-lg">Discovering the perfect items for you...</p>
-          <div class="mt-6 flex justify-center gap-2">
-            <div class="w-3 h-3 bg-violet-500 rounded-full animate-bounce shadow-lg"></div>
-            <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.1s"></div>
-            <div class="w-3 h-3 bg-pink-500 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.2s"></div>
+
+          <!-- Product Image -->
+          <div class="relative aspect-square overflow-hidden">
+            <img 
+              :src="getImageUrl(product?.image)" 
+              :alt="product?.name"
+              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            >
+            
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <!-- Action Buttons -->
+            <div class="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <button 
+                @click="addToCart(product)"
+                class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-violet-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
+                :disabled="product?.stock === 0"
+              >
+                <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
+              </button>
+              <NuxtLink 
+                :to="`/${route.params.slug}/${product.slug}`"
+                class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
+              >
+                <Icon name="mdi:eye" class="w-6 h-6" />
+              </NuxtLink>
+            </div>
+
+            <!-- Stock Badge -->
+            <div v-if="product?.stock > 0" class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {{ product.stock }} in stock
+            </div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-6">
+            <NuxtLink 
+              :to="`/${route.params.slug}/${product?.slug}`"
+              class="block group/title"
+            >
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">
+                {{ product?.name }}
+              </h3>
+            </NuxtLink>
+            
+            <!-- Rating -->
+            <div class="flex items-center gap-2 mb-4">
+              <div class="flex items-center">
+                <div 
+                  v-for="star in 5" 
+                  :key="star"
+                  class="relative w-4 h-4"
+                >
+                  <Icon 
+                    name="mdi:star" 
+                    class="absolute w-4 h-4 text-gray-300 dark:text-gray-600"
+                  />
+                  <div 
+                    class="absolute overflow-hidden"
+                    :style="{ width: getStarWidth(star, product?.scaleRating || 0) }"
+                  >
+                    <Icon 
+                      name="mdi:star" 
+                      class="w-4 h-4 text-yellow-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <span class="text-sm text-gray-500 dark:text-gray-400">
+                ({{ product?.scaleRating}})
+              </span>
+            </div>
+
+            <!-- Price -->
+            <div class="flex items-center justify-between">
+              <div class="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                ${{ product?.price }}
+              </div>
+              <button 
+                @click="addToCart(product)"
+                class="bg-gradient-to-r from-violet-500 to-purple-500 text-white px-4 py-2 rounded-xl hover:from-violet-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg font-medium"
+                :disabled="product?.stock === 0"
+              >
+                Add to Cart
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Enhanced Breadcrumb -->
-      <div class="max-w-8xl mx-auto">
-        <nav class="mb-12 relative group">
-          <div class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-gray-700/60 shadow-xl group-hover:shadow-2xl transition-all duration-300"></div>
-          <ol class="flex items-center space-x-4 px-6 py-4 relative z-10">
-            <li>
-              <NuxtLink 
-                to="/" 
-                class="group/link flex items-center text-gray-700 hover:text-violet-600 dark:text-gray-300 dark:hover:text-violet-400 transition-all duration-300"
-              >
-                <Icon name="mdi:home-variant" class="w-5 h-5 mr-2 group-hover/link:scale-110 transition-transform" />
-                <span class="font-medium group-hover/link:font-semibold">Home</span>
-              </NuxtLink>
-            </li>
-            <li><Icon name="mdi:chevron-right" class="w-5 h-5 text-gray-400" /></li>
-            <li>
-              <span class="text-violet-600 dark:text-violet-400 font-semibold">
-                {{ category?.name }}
-              </span>
-            </li>
-          </ol>
-        </nav>
+      <!-- Enhanced Pagination -->
+      <div v-if="!isLoading && products && products.length > 0" class="flex justify-center">
+        <UPagination 
+          v-model:page="page" 
+          :items-per-page="pageSize" 
+          :total="totalItems"
+          class="pagination-enhanced"
+        />
+      </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div v-if="!isLoading && (!products || products.length === 0)" class="flex justify-center items-center">
+      <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-28">
+        <!-- Epic 404 Illustration - Responsive -->
+        <div class="relative mb-8 sm:mb-12">
+          <!-- Floating background elements -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-br from-indigo-200/30 via-purple-200/30 to-pink-200/30 rounded-full blur-3xl animate-pulse"></div>
+          </div>
 
-        <!-- Category Header -->
-        <div class="text-center mb-12">
-          <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            {{ category?.name }}
-          </h1>
-          <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Discover our curated collection of premium products
-          </p>
-        </div>
-
-        <!-- Products Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
-          <div 
-            v-for="product in products"
-            :key="product.slug"
-            class="group relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-gray-100 dark:border-gray-700"
-          >
-            <!-- Sold Out Overlay -->
-            <div v-if="product?.stock === 0" class="absolute z-20 inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center rounded-3xl">
-              <div class="text-center">
-                <Icon name="mdi:package-variant-closed" class="w-16 h-16 text-red-400 mx-auto mb-2" />
-                <p class="text-white text-xl font-bold">Sold Out</p>
-              </div>
+          <!-- Main container with floating elements -->
+          <div class="relative inline-block">
+            <!-- Smaller 404 text with gradient - Responsive -->
+            <div class="text-[4rem] sm:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-black text-transparent bg-gradient-to-br from-indigo-200 via-purple-300 to-pink-200 dark:from-indigo-800 dark:via-purple-700 dark:to-pink-800 bg-clip-text opacity-20 select-none animate-pulse">
+              404
             </div>
 
-            <!-- Product Image -->
-            <div class="relative aspect-square overflow-hidden">
-              <img 
-                :src="getImageUrl(product?.image)" 
-                :alt="product?.name"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              >
-              
-              <!-- Gradient Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <!-- Action Buttons -->
-              <div class="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <button 
-                  @click="addToCart(product)"
-                  class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-violet-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
-                  :disabled="product?.stock === 0"
-                >
-                  <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
-                </button>
-                <NuxtLink 
-                  :to="`/${route.params.slug}/${product.slug}`"
-                  class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
-                >
-                  <Icon name="mdi:eye" class="w-6 h-6" />
-                </NuxtLink>
-              </div>
-
-              <!-- Stock Badge -->
-              <div v-if="product?.stock > 0" class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {{ product.stock }} in stock
-              </div>
-            </div>
-
-            <!-- Product Info -->
-            <div class="p-6">
-              <NuxtLink 
-                :to="`/${route.params.slug}/${product?.slug}`"
-                class="block group/title"
-              >
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">
-                  {{ product?.name }}
-                </h3>
-              </NuxtLink>
-              
-              <!-- Rating -->
-              <div class="flex items-center gap-2 mb-4">
-                <div class="flex items-center">
-                  <div 
-                    v-for="star in 5" 
-                    :key="star"
-                    class="relative w-4 h-4"
-                  >
-                    <Icon 
-                      name="mdi:star" 
-                      class="absolute w-4 h-4 text-gray-300 dark:text-gray-600"
-                    />
-                    <div 
-                      class="absolute overflow-hidden"
-                      :style="{ width: getStarWidth(star, product?.scaleRating || 0) }"
-                    >
-                      <Icon 
-                        name="mdi:star" 
-                        class="w-4 h-4 text-yellow-500"
-                      />
-                    </div>
-                  </div>
+            <!-- Floating animated elements - Responsive -->
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="relative animate-float">
+                <!-- Main icon with enhanced styling -->
+                <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl transform hover:scale-105 sm:hover:scale-110 transition-all duration-500 hover:rotate-3">
+                  <Icon name="mdi:package-variant-closed-remove" class="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-white" />
                 </div>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                  ({{ product?.scaleRating}})
-                </span>
-              </div>
 
-              <!-- Price -->
-              <div class="flex items-center justify-between">
-                <div class="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                  ${{ product?.price }}
-                </div>
-                <button 
-                  @click="addToCart(product)"
-                  class="bg-gradient-to-r from-violet-500 to-purple-500 text-white px-4 py-2 rounded-xl hover:from-violet-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg font-medium"
-                  :disabled="product?.stock === 0"
-                >
-                  Add to Cart
-                </button>
+                <!-- Enhanced floating particles - Responsive -->
+                <div class="absolute -top-3 sm:-top-5 -right-3 sm:-right-5 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full animate-bounce shadow-lg"></div>
+                <div class="absolute -bottom-5 sm:-bottom-7 -left-5 sm:-left-7 w-3 h-3 sm:w-5 sm:h-5 bg-gradient-to-br from-pink-400 to-red-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.5s"></div>
+                <div class="absolute top-1 sm:top-2 left-10 sm:left-14 lg:left-16 w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 1s"></div>
+                <div class="absolute -top-1 sm:-top-3 left-5 sm:left-7 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 1.5s"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Enhanced Pagination -->
-        <div v-if="!isLoading && products && products.length > 0" class="flex justify-center">
-          <UPagination 
-            v-model:page="page" 
-            :items-per-page="pageSize" 
-            :total="totalItems"
-            class="pagination-enhanced"
-          />
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="!isLoading && (!products || products.length === 0)" class="text-center py-16">
-          <div class="max-w-md mx-auto">
-            <Icon name="mdi:package-variant" class="w-24 h-24 text-gray-400 mx-auto mb-6" />
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Products Found</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-8">
-              We couldn't find any products in this category at the moment.
+        <!-- Enhanced error message content - Responsive -->
+        <div class="space-y-6 sm:space-y-8">
+          <!-- Main heading -->
+          <div class="space-y-3 sm:space-y-5">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
+              Oops! Product Lost in Space
+            </h1>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto font-medium">
+              The product you're searching for has taken an unexpected journey into the digital cosmos. Let's help you navigate back to amazing deals!
             </p>
-            <NuxtLink 
-              to="/"
-              class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-xl hover:from-violet-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg font-medium"
-            >
-              <Icon name="mdi:arrow-left" class="w-5 h-5 mr-2" />
-              Back to Home
-            </NuxtLink>
+          </div>
+
+          <!-- Enhanced helpful suggestions - Responsive -->
+          <div class="bg-gradient-to-br from-white/80 via-gray-50/80 to-white/80 dark:from-gray-800/80 dark:via-gray-700/80 dark:to-gray-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-lg sm:shadow-xl border border-gray-200/50 dark:border-gray-600/50">
+            <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-6 sm:mb-8">What would you like to do?</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <!-- Enhanced go back button - Responsive -->
+              <button 
+                @click="$router.go(-1)"
+                class="group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
+              >
+                <Icon name="mdi:arrow-left-circle" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:-translate-x-1 sm:group-hover:-translate-x-2 group-hover:scale-110" />
+                <div class="text-left">
+                  <span class="font-black text-base sm:text-lg lg:text-xl block">Go Back</span>
+                  <span class="text-xs sm:text-sm opacity-90">Return to previous page</span>
+                </div>
+              </button>
+
+              <!-- Enhanced browse all products - Responsive -->
+              <NuxtLink 
+                to="/"
+                class="group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
+              >
+                <Icon name="mdi:view-grid-plus" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                <div class="text-left">
+                  <span class="font-black text-base sm:text-lg lg:text-xl block">Browse Products</span>
+                  <span class="text-xs sm:text-sm opacity-90">Discover amazing deals</span>
+                </div>
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
