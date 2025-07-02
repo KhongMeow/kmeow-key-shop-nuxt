@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6 px-4 sm:px-6 lg:px-8 rounded-xl">
+  <div class="bg-gray-50 dark:bg-gray-800 py-6 px-4 sm:px-6 lg:px-8 rounded-xl">
     <div class="mx-auto">
       <!-- Enhanced Header -->
       <div class="mb-8 animate-fade-in">

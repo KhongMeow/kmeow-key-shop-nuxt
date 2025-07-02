@@ -221,10 +221,10 @@
     accessorKey: 'actions',
     header: 'Actions',
     cell: ({ row }) => {
-      return h('div', { class: 'flex' }, [
+      return h('div', { class: 'sm:flex' }, [
         h(UButton, {
           class: [
-            'px-2 py-1 mr-2 rounded flex items-center transition-colors bg-blue-600 text-white',
+            'px-2 py-1 m-1 rounded flex items-center transition-colors bg-blue-600 text-white',
             canEdit
               ? 'hover:bg-blue-700'
               : 'cursor-not-allowed'
@@ -240,7 +240,7 @@
         }),
         h(UButton, {
           class: [
-            'px-2 py-1 rounded flex items-center transition-colors bg-red-600 text-white',
+            'px-2 py-1 m-1 rounded flex items-center transition-colors bg-red-600 text-white',
             canDelete
               ? 'hover:bg-red-700'
               : 'cursor-not-allowed'

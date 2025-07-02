@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 p-6 rounded-xl">
+  <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl">
     
     <!-- Header Section -->
     <div class="mb-8">
