@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6 px-4 sm:px-6 lg:px-8 rounded-xl">
+  <div class="bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6 px-4 sm:px-6 lg:px-8 rounded-xl">
     <div class="mx-auto">
       <!-- Enhanced Header -->
       <div class="mb-8 animate-fade-in">
@@ -74,7 +74,7 @@
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
                   <div class="lg:col-span-2">
                     <InputTextbox
                       label="Product Name"
@@ -134,30 +134,28 @@
                   </div>
                 </div>
                 
-                <div class="space-y-6">
-                  <div class="lg:col-span-1">
-                    <InputTextArea
-                      label="Technical Detail"
-                      v-model="detail"
-                      :error="errors.detail"
-                      id="detail"
-                      placeholder="Product technical specifications, compatibility, and requirements..."
-                      class="w-full"
-                      :class="{ 'animate-shake': errors.detail }"
-                    />
-                  </div>
-                  
-                  <div class="lg:col-span-1">
-                    <InputTextArea
-                      label="Marketing Description"
-                      v-model="description"
-                      :error="errors.description"
-                      id="description"
-                      placeholder="Product features, benefits, and unique selling points..."
-                      class="w-full"
-                      :class="{ 'animate-shake': errors.description }"
-                    />
-                  </div>
+                <div class="lg:col-span-1">
+                  <InputTextArea
+                    label="Technical Detail"
+                    v-model="detail"
+                    :error="errors.detail"
+                    id="detail"
+                    placeholder="Product technical specifications, compatibility, and requirements..."
+                    class="w-full"
+                    :class="{ 'animate-shake': errors.detail }"
+                  />
+                </div>
+                
+                <div class="lg:col-span-1">
+                  <InputTextArea
+                    label="Marketing Description"
+                    v-model="description"
+                    :error="errors.description"
+                    id="description"
+                    placeholder="Product features, benefits, and unique selling points..."
+                    class="w-full"
+                    :class="{ 'animate-shake': errors.description }"
+                  />
                 </div>
               </div>
             </div>

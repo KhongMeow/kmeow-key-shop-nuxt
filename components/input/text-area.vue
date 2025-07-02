@@ -1,5 +1,5 @@
 <template>
-  <div class="group relative mb-2">
+  <div class="group relative mb-4">
     <!-- Floating Label -->
     <label 
       :for="id" 

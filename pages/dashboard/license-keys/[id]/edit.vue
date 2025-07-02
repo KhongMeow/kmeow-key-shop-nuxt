@@ -1,148 +1,507 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="flex-1 divide-y divide-accented w-full shadow-2xl bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-800 p-4 rounded-xl">
-    <HeaderPageHead title="Edit License Key" />
+  <div class="bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6 px-4 sm:px-6 lg:px-8 rounded-xl">
+    <div class="mx-auto">
+      <!-- Enhanced Header -->
+      <div class="mb-8 animate-fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="space-y-2">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Icon name="heroicons:pencil-square-20-solid" class="w-5 h-5 text-white" />
+              </div>
+              <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Edit License Key</h1>
+            </div>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-md">
+              Update license key information and product association
+            </p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <NuxtLink 
+              to="/dashboard/license-keys" 
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm"
+            >
+              <Icon name="heroicons:arrow-left-20-solid" class="w-4 h-4 mr-2" />
+              Back to License Keys
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
 
-    <ButtonSubmit class="ml-auto" :disabled="isEditing">
-      {{ isEditing ? 'Editing...' : 'Edit' }}
-    </ButtonSubmit>
+      <!-- Progress Indicator -->
+      <div class="mb-8 animate-fade-in-delay-1">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Form Completion</span>
+            <span class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ formCompletionPercentage }}%</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div 
+              class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300 ease-out"
+              :style="{ width: `${formCompletionPercentage}%` }"
+            ></div>
+          </div>
+        </div>
+      </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-3.5 overflow-x-auto">
-      <InputTextbox
-        label="Key"
-        type="text"
-        id="key"
-        placeholder="Enter key of the license"
-        v-model="key"
-        :error="errors.key"
-      />
-      <InputSelectBox
-        label="Product"
-        id="product"
-        v-model="product"
-        :options="products?.map(product => ({ value: String(product.slug), label: product.name }))"
-        :error="errors.product"
-        :placeholder="'Select a product...'"
-      />
+      <!-- Main Form -->
+      <form @submit.prevent="handleSubmit" class="space-y-8">
+        <!-- Form Cards Container -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <!-- Main Form Content -->
+          <div class="xl:col-span-2 space-y-8">
+            
+            <!-- License Key Information Card -->
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-delay-2">
+              <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1"></div>
+              <div class="p-6 sm:p-8">
+                <div class="flex items-center mb-6">
+                  <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mr-4">
+                    <Icon name="heroicons:key-20-solid" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">License Key Details</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Update license key information</p>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                  <div class="lg:col-span-2 mb-4">
+                    <InputTextbox
+                      label="License Key"
+                      type="text"
+                      id="key"
+                      placeholder="Enter unique license key (e.g., XXXX-XXXX-XXXX-XXXX)"
+                      v-model="key"
+                      :error="errors.key"
+                      class="w-full"
+                      :class="{ 'animate-shake': errors.key }"
+                    />
+                  </div>
+                  
+                  <div class="lg:col-span-2">
+                    <InputSelectBox
+                      label="Associated Product"
+                      id="product"
+                      v-model="product"
+                      :options="products?.map(product => ({ value: String(product.slug), label: product.name }))"
+                      :error="errors.product"
+                      :placeholder="'Choose a product...'"
+                      :loading="isLoading"
+                      class="w-full"
+                      :class="{ 'animate-shake': errors.product }"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Sidebar -->
+          <div class="xl:col-span-1 space-y-8">
+            
+            <!-- License Key Status Card -->
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-delay-4">
+              <div class="bg-gradient-to-r from-green-500 to-green-600 h-1"></div>
+              <div class="p-6">
+                <div class="flex items-center mb-4">
+                  <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
+                    <Icon name="heroicons:information-circle-20-solid" class="w-4 h-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Key Status</h3>
+                </div>
+                
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between py-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Current Status</span>
+                    <div class="flex items-center">
+                      <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                        {{ data?.status || 'Loading...' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Summary Card -->
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in-delay-3">
+              <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-1"></div>
+              <div class="p-6">
+                <div class="flex items-center mb-4">
+                  <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mr-3">
+                    <Icon name="heroicons:clipboard-document-check-20-solid" class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Form Summary</h3>
+                </div>
+                
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">License Key</span>
+                    <div class="flex items-center">
+                      <Icon 
+                        :name="key ? 'heroicons:check-circle-20-solid' : 'heroicons:x-circle-20-solid'" 
+                        :class="key ? 'text-green-500' : 'text-red-500'"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between py-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Product</span>
+                    <div class="flex items-center">
+                      <Icon 
+                        :name="product ? 'heroicons:check-circle-20-solid' : 'heroicons:x-circle-20-solid'" 
+                        :class="product ? 'text-green-500' : 'text-red-500'"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-end animate-fade-in-delay-5">
+          <button
+            type="button"
+            @click="resetForm"
+            class="w-full sm:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm"
+            :disabled="isEditing"
+          >
+            <Icon name="heroicons:arrow-path-20-solid" class="w-4 h-4 mr-2" />
+            Reset Changes
+          </button>
+          
+          <ButtonSubmit 
+            class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg" 
+            :disabled="isEditing || !isFormValid"
+          >
+            <Icon 
+              v-if="isEditing" 
+              name="heroicons:arrow-path-20-solid" 
+              class="w-4 h-4 mr-2 animate-spin" 
+            />
+            <Icon 
+              v-else 
+              name="heroicons:pencil-square-20-solid" 
+              class="w-4 h-4 mr-2" 
+            />
+            {{ isEditing ? 'Updating License Key...' : 'Update License Key' }}
+          </ButtonSubmit>
+        </div>
+      </form>
+
+      <!-- Enhanced Loading Overlay -->
+      <div 
+        v-if="isLoading" 
+        class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
+      >
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-sm w-full mx-4">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="heroicons:arrow-path-20-solid" class="w-8 h-8 animate-spin text-white" />
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Loading Data</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Please wait while we fetch the license key and products...</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </form>
+  </div>
 </template>
 
 <script lang="ts" setup>
-  import Swal from 'sweetalert2';
-  import type { LicenseKey } from '~/types/license-keys';
-  import type { Product } from '~/types/products';
-  
-  definePageMeta({
-    layout: 'dashboard',
-    middleware: ['auth', 'dashboard', 'permission'],
-    requiredPermission: 'update-license-key'
-  });
+import Swal from 'sweetalert2';
+import type { LicenseKey } from '~/types/license-keys';
+import type { Product } from '~/types/products';
 
-  const key = ref('');
-  const product = ref<string | undefined>(undefined);
-  const products = ref<Product[] | undefined>(undefined);
-  const isLoading = ref(false);
-  const error = ref<string | null>(null);
-  let isEditing = ref(false);
-  const route = useRoute();
-  const id = computed(() => route.params.id);
+definePageMeta({
+  layout: 'dashboard',
+  middleware: ['auth', 'dashboard', 'permission'],
+  requiredPermission: 'update-license-key'
+});
 
-  const data = ref<LicenseKey | null>(null);
-  const errors = reactive({
-    key: '',
-    product: '',
-  });
+// Reactive data
+const key = ref('');
+const product = ref<string | undefined>(undefined);
+const products = ref<Product[] | undefined>(undefined);
+const isLoading = ref(false);
+const error = ref<string | null>(null);
+let isEditing = ref(false);
+const route = useRoute();
+const id = computed(() => route.params.id);
 
-  onMounted(async () => {
-    await [getProducts(), getLicenseKey()];
-  });
+const data = ref<LicenseKey | null>(null);
+const originalData = ref<{ key: string; product: string | undefined }>({ key: '', product: undefined });
 
-  async function getLicenseKey() {
-    try {
-      const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
-        method: 'GET',
+// Form validation errors
+const errors = reactive({
+  key: '',
+  product: '',
+});
+
+// Computed properties
+const isFormValid = computed(() => {
+  return key.value && 
+         product.value &&
+         !errors.key && 
+         !errors.product;
+});
+
+const formCompletionPercentage = computed(() => {
+  const fields = [key.value, product.value];
+  const completedFields = fields.filter(field => field && field.toString().trim().length > 0).length;
+  return Math.round((completedFields / fields.length) * 100);
+});
+
+// Lifecycle
+onMounted(async () => {
+  await Promise.all([getProducts(), getLicenseKey()]);
+});
+
+// Methods
+async function getLicenseKey() {
+  try {
+    isLoading.value = true;
+    const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
+      method: 'GET',
+    });
+
+    data.value = Array.isArray(response) ? response[0] : response;
+    if (data.value) {
+      key.value = data.value.key;
+      product.value = data.value.product?.slug;
+      
+      // Store original data for reset functionality
+      originalData.value = {
+        key: data.value.key,
+        product: data.value.product?.slug
+      };
+    }
+  } catch (err: any) {
+    error.value = err?.message || 'Unknown error';
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Loading License Key',
+      text: 'Failed to load license key data. Please refresh the page.',
+      timer: 3000,
+      showConfirmButton: false,
+      ...getSwalTheme(),
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function getProducts() {
+  try {
+    const response = await useApi<Product[]>(`/products`, {
+      method: 'GET',
+    });
+    products.value = response;
+    error.value = null;
+  } catch (err: any) {
+    error.value = err?.message || 'Unknown error';
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Loading Products',
+      text: 'Failed to load products. Please refresh the page.',
+      timer: 3000,
+      showConfirmButton: false,
+      ...getSwalTheme(),
+    });
+  }
+}
+
+// Validation functions
+const validateKey = (newValue: string) => {
+  if (!newValue || newValue.trim().length === 0) {
+    errors.key = 'License key is required';
+  } else {
+    errors.key = '';
+  }
+};
+
+const validateProduct = (newValue: string | undefined) => {
+  errors.product = newValue ? '' : 'Product selection is required';
+};
+
+// Watchers for real-time validation
+watch(key, validateKey);
+watch(product, validateProduct);
+
+// Reset form to original values
+const resetForm = () => {
+  Swal.fire({
+    title: 'Reset Changes?',
+    text: 'This will revert all changes back to the original values',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, reset',
+    cancelButtonText: 'Cancel',
+    ...getSwalTheme(),
+  }).then((result) => {
+    if (result.isConfirmed) {
+      key.value = originalData.value.key;
+      product.value = originalData.value.product;
+      
+      // Clear errors
+      Object.keys(errors).forEach(key => {
+        errors[key as keyof typeof errors] = '';
       });
 
-      data.value = Array.isArray(response) ? response[0] : response;
-      if (data.value) {
-        key.value = data.value.key;
-        product.value = data.value.product?.slug;
-      }
-    } catch (err: any) {
-      error.value = err?.message || 'Unknown error';
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  async function getProducts() {
-    try {
-      isLoading.value = true;
-      const response = await useApi<Product[]>(`/products`, {
-        method: 'GET',
+      Swal.fire({
+        icon: 'success',
+        title: 'Changes Reset',
+        text: 'All changes have been reverted to original values',
+        timer: 1500,
+        showConfirmButton: false,
+        ...getSwalTheme(),
       });
-      products.value = response;
-      error.value = null;
-    } catch (err: any) {
-      error.value = err?.message || 'Unknown error';
-    } finally {
-      isLoading.value = false;
     }
+  });
+};
+
+// Form submission
+const handleSubmit = async () => {
+  // Validate all fields
+  validateKey(key.value);
+  validateProduct(product.value);
+
+  if (!isFormValid.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Form Incomplete',
+      text: 'Please fill in all required fields and fix any errors',
+      timer: 3000,
+      showConfirmButton: false,
+      ...getSwalTheme(),
+    });
+    return;
   }
 
-  const validateKey = async (newValue: string) => {
-    errors.key = newValue ? '' : 'Key is required';
-  };
+  try {
+    isEditing.value = true;
+    const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
+      method: 'PATCH',
+      data: {
+        key: key.value.trim(),
+        productSlug: product.value,
+      },
+    });
 
-  const validateProduct = async (newValue: string | undefined) => {
-    errors.product = newValue ? '' : 'Product is required';
-  };
-
-  watch(key, validateKey);
-  watch(product, validateProduct);
-
-  const handleSubmit = async () => {
-    validateKey(key.value);
-    validateProduct(product.value);
-
-    if (!errors.key && !errors.product) {
-      try {
-        isEditing.value = true;
-        const response = await useApi<LicenseKey[]>(`/license-keys/${id.value}`, {
-          method: 'PATCH',
-          data: {
-            key: key.value,
-            productSlug: product.value,
-          },
-        });
-
-        if (response) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'License Key updated successfully!',
-            timer: 2000,
-            showConfirmButton: false,
-            ...getSwalTheme(),
-          });
-          navigateTo('/dashboard/license-keys');
-        }
-      } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: err.response?.data?.message || 'Failed to update license key',
-          timer: 2000,
-          showConfirmButton: false,
-          ...getSwalTheme(),
-        });
-      } finally {
-        isEditing.value = false;
-      }
+    if (response) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'License Key Updated Successfully!',
+        text: 'Your license key has been updated',
+        timer: 2000,
+        showConfirmButton: false,
+        ...getSwalTheme(),
+      });
+      
+      await navigateTo('/dashboard/license-keys');
     }
-  };
+  } catch (err: any) {
+    console.error('Update license key error:', err);
+    
+    let errorMessage = 'Failed to update license key. Please try again.';
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Update Failed',
+      text: errorMessage,
+      confirmButtonText: 'Try Again',
+      ...getSwalTheme(),
+    });
+  } finally {
+    isEditing.value = false;
+  }
+};
 </script>
 
-<style>
+<style scoped>
+/* Enhanced animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fadeIn 0.6s ease-out 0.1s both;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+.animate-fade-in-delay-4 {
+  animation: fadeIn 0.6s ease-out 0.4s both;
+}
+
+.animate-fade-in-delay-5 {
+  animation: fadeIn 0.6s ease-out 0.5s both;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Enhanced form styling */
+:deep(.form-input:focus) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive grid improvements */
+@media (max-width: 1279px) {
+  .xl\:col-span-2 {
+    grid-column: span 1;
+  }
+  .xl\:col-span-1 {
+    grid-column: span 1;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .grid-cols-1 {
+    gap: 1rem;
+  }
+  
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  .sm\:p-8 {
+    padding: 1.5rem;
+  }
+}
 </style>
