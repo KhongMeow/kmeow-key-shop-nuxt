@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto py-6 relative z-10">
     <!-- Enhanced Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center min-h-[80vh]">
+    <div v-if="isLoading && products.length === 0" class="flex justify-center items-center min-h-[80vh]">
       <div class="text-center px-4">
         <div class="relative mb-8">
           <div class="w-32 h-32 mx-auto">
@@ -24,27 +24,6 @@
 
     <!-- Enhanced Breadcrumb -->
     <div v-else-if="products" class="max-w-8xl mx-auto">
-      <nav class="mb-12 relative group">
-        <div class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/60 dark:border-gray-700/60 shadow-xl group-hover:shadow-2xl transition-all duration-300"></div>
-        <ol class="flex items-center space-x-4 px-6 py-4 relative z-10">
-          <li>
-            <NuxtLink 
-              to="/" 
-              class="group/link flex items-center text-gray-700 hover:text-violet-600 dark:text-gray-300 dark:hover:text-violet-400 transition-all duration-300"
-            >
-              <Icon name="mdi:home-variant" class="w-5 h-5 mr-2 group-hover/link:scale-110 transition-transform" />
-              <span class="font-medium group-hover/link:font-semibold">Home</span>
-            </NuxtLink>
-          </li>
-          <li><Icon name="mdi:chevron-right" class="w-5 h-5 text-gray-400" /></li>
-          <li>
-            <span class="text-violet-600 dark:text-violet-400 font-semibold">
-              {{ category?.name }}
-            </span>
-          </li>
-        </ol>
-      </nav>
-
       <!-- Category Header -->
       <div class="text-center mb-12">
         <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
@@ -56,7 +35,7 @@
       </div>
 
       <!-- Products Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
+      <div v-if="products && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
         <div 
           v-for="product in products"
           :key="product.slug"
@@ -72,10 +51,25 @@
 
           <!-- Product Image -->
           <div class="relative aspect-square overflow-hidden">
+            <!-- Default placeholder when no image or image fails -->
+            <div 
+              v-if="!product?.image || imageErrors[product.slug]"
+              class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700"
+            >
+              <div class="text-center">
+                <Icon name="mdi:image-off-outline" class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">No Image Available</p>
+              </div>
+            </div>
+            
+            <!-- Product Image -->
             <img 
-              :src="getImageUrl(product?.image)" 
+              v-else
+              :src="getImageUrl(product.image)" 
               :alt="product?.name"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              @error="handleImageError(product.slug)"
+              @load="handleImageLoad(product.slug)"
             >
             
             <!-- Gradient Overlay -->
@@ -160,14 +154,20 @@
         </div>
       </div>
 
-      <!-- Enhanced Pagination -->
-      <div v-if="!isLoading && products && products.length > 0" class="flex justify-center">
-        <UPagination 
-          v-model:page="page" 
-          :items-per-page="pageSize" 
-          :total="totalItems"
-          class="pagination-enhanced"
-        />
+      <!-- Load More Indicator -->
+      <div v-if="isLoadingMore" class="flex justify-center items-center py-8">
+        <div class="text-center">
+          <div class="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p class="text-gray-600 dark:text-gray-400">Loading more products...</p>
+        </div>
+      </div>
+
+      <!-- End of Products Indicator -->
+      <div v-if="hasReachedEnd && products.length > 0" class="text-center py-8">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+          <Icon name="mdi:check-circle" class="w-5 h-5 text-green-500" />
+          <span class="text-gray-600 dark:text-gray-400">You've seen all products!</span>
+        </div>
       </div>
     </div>
     
@@ -251,6 +251,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <Transition name="fade">
+      <button
+        v-if="showScrollTop"
+        @click="scrollToTop"
+        class="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
+      >
+        <Icon name="mdi:arrow-up" class="w-6 h-6 mx-auto" />
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -259,15 +270,26 @@ import type { Product } from '~/types/products';
 import type { Category } from '~/types/categories';
 import { useCartStore } from '~/store/cartStore';
 
-const isLoading = ref(false);
+const isLoading = ref(true);
+const isLoadingMore = ref(false);
 const category = ref<Category | null>(null);
-const products = ref<Product[] | null>(null);
+const products = ref<Product[]>([]);
 const route = useRoute();
 const config = useRuntimeConfig();
 
 const page = ref(1);
-const pageSize = ref(12); // Increased page size for better grid layout
-const totalItems = ref(0);
+const pageSize = ref(12);
+const hasReachedEnd = ref(false);
+const showScrollTop = ref(false);
+const imageErrors = ref<Record<string, boolean>>({});
+
+const handleImageError = (productSlug: string) => {
+  imageErrors.value[productSlug] = true;
+};
+
+const handleImageLoad = (productSlug: string) => {
+  imageErrors.value[productSlug] = false;
+};
 
 const addToCart = (product: Product) => {
   const cart = useCartStore();
@@ -292,21 +314,83 @@ const getStarWidth = (starIndex: number, rating: number) => {
   }
 };
 
-watch(page, async () => {
-  await fetchProducts();
-});
-
-const fetchProducts = async () => {
+const fetchProducts = async (pageNum: number = 1, append: boolean = false) => {
   try {
     const slug = route.params.slug;
 
-    const response = await useApi<Product[]>(`/products?categorySlug=${slug}&limit=${pageSize.value}&page=${page.value}&order=scaleRating&direction=desc&hideSoldOut=true`, {
+    if (pageNum === 1) {
+      isLoading.value = true;
+    } else {
+      isLoadingMore.value = true;
+    }
+
+    const response = await useApi<Product[]>(`/products?categorySlug=${slug}&limit=${pageSize.value}&page=${pageNum}&order=scaleRating&direction=desc&hideSoldOut=true`, {
       method: 'GET',
     });
     
-    products.value = response;
+    if (response.length === 0) {
+      hasReachedEnd.value = true;
+      return;
+    }
+
+    if (append) {
+      products.value = [...products.value, ...response];
+    } else {
+      products.value = response;
+    }
+
+    // Check if we got fewer products than requested (last page)
+    if (response.length < pageSize.value) {
+      hasReachedEnd.value = true;
+    }
   } catch (err) {
     console.error('Failed to fetch products:', err);
+    if (!append) {
+      products.value = [];
+    }
+  } finally {
+    isLoading.value = false;
+    isLoadingMore.value = false;
+  }
+};
+
+const loadMore = async () => {
+  if (isLoadingMore.value || hasReachedEnd.value) return;
+  
+  page.value++;
+  await fetchProducts(page.value, true);
+};
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
+// Scroll event handler
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 500;
+  
+  // Check if user is near bottom of page for infinite scroll
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const windowHeight = window.innerHeight;
+  const docHeight = document.documentElement.offsetHeight;
+  
+  if (scrollTop + windowHeight >= docHeight - 200 && !isLoadingMore.value && !hasReachedEnd.value) {
+    loadMore();
+  }
+};
+
+// Setup scroll listeners
+const setupScrollListeners = () => {
+  if (process.client) {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Cleanup
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll);
+    });
   }
 };
 
@@ -321,12 +405,8 @@ onMounted(async () => {
       category.value = categoryResponse;
     }
 
-    const countResponse = await useApi<Product[]>(`/products?categorySlug=${slug}&hideSoldOut=true`, {
-      method: 'GET',
-    });
-    totalItems.value = countResponse.length;
-
-    await fetchProducts();
+    await fetchProducts(1, false);
+    setupScrollListeners();
   } finally {
     isLoading.value = false;
   }
@@ -334,5 +414,28 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
 
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

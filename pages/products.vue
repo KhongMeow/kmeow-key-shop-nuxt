@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto py-6 relative z-10">
     <!-- Enhanced Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center min-h-[80vh]">
+    <div v-if="isLoading && products.length === 0" class="flex justify-center items-center min-h-[80vh]">
       <div class="text-center px-4">
         <div class="relative mb-8">
           <div class="w-32 h-32 mx-auto">
@@ -51,10 +51,24 @@
 
           <!-- Product Image -->
           <div class="relative aspect-square overflow-hidden">
+            <div 
+              v-if="!product?.image || imageErrors[product.slug]"
+              class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700"
+            >
+              <div class="text-center">
+                <Icon name="mdi:image-off-outline" class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">No Image Available</p>
+              </div>
+            </div>
+            
+            <!-- Product Image -->
             <img 
-              :src="getImageUrl(product?.image)" 
+              v-else
+              :src="getImageUrl(product.image)" 
               :alt="product?.name"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              @error="handleImageError(product.slug)"
+              @load="handleImageLoad(product.slug)"
             >
             
             <!-- Gradient Overlay -->
@@ -70,7 +84,7 @@
                 <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
               </button>
               <NuxtLink 
-                :to="`/product/${product.slug}`"
+                :to="`/${product?.category.slug}/${product.slug}`"
                 class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
               >
                 <Icon name="mdi:eye" class="w-6 h-6" />
@@ -91,7 +105,7 @@
           <!-- Product Info -->
           <div class="p-6">
             <NuxtLink 
-              :to="`/product/${product?.slug}`"
+              :to="`/${product?.category.slug}/${product?.slug}`"
               class="block group/title"
             >
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">
@@ -144,61 +158,114 @@
         </div>
       </div>
 
-      <!-- Enhanced Pagination -->
-      <div v-if="!isLoading && products && products.length > 0" class="flex justify-center">
-        <UPagination 
-          v-model:page="page" 
-          :items-per-page="pageSize" 
-          :total="totalItems"
-          class="pagination-enhanced"
-        />
+      <!-- Load More Indicator -->
+      <div v-if="isLoadingMore" class="flex justify-center items-center py-8">
+        <div class="text-center">
+          <div class="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p class="text-gray-600 dark:text-gray-400">Loading more products...</p>
+        </div>
+      </div>
+
+      <!-- End of Products Indicator -->
+      <div v-if="hasReachedEnd && products.length > 0" class="text-center py-8">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+          <Icon name="mdi:check-circle" class="w-5 h-5 text-green-500" />
+          <span class="text-gray-600 dark:text-gray-400">You've seen all products!</span>
+        </div>
       </div>
 
       <!-- Empty State -->
       <div v-if="!isLoading && (!products || products.length === 0)" class="flex justify-center items-center">
         <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-28">
-          <!-- Epic Empty State Illustration -->
+          <!-- Epic 404 Illustration - Responsive -->
           <div class="relative mb-8 sm:mb-12">
+            <!-- Floating background elements -->
             <div class="absolute inset-0 flex items-center justify-center">
               <div class="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-br from-indigo-200/30 via-purple-200/30 to-pink-200/30 rounded-full blur-3xl animate-pulse"></div>
             </div>
 
+            <!-- Main container with floating elements -->
             <div class="relative inline-block">
+              <!-- Smaller 404 text with gradient - Responsive -->
               <div class="text-[4rem] sm:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-black text-transparent bg-gradient-to-br from-indigo-200 via-purple-300 to-pink-200 dark:from-indigo-800 dark:via-purple-700 dark:to-pink-800 bg-clip-text opacity-20 select-none animate-pulse">
-                No Results
+                404
               </div>
 
+              <!-- Floating animated elements - Responsive -->
               <div class="absolute inset-0 flex items-center justify-center">
                 <div class="relative animate-float">
+                  <!-- Main icon with enhanced styling -->
                   <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6 sm:p-8 lg:p-10 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl transform hover:scale-105 sm:hover:scale-110 transition-all duration-500 hover:rotate-3">
-                    <Icon name="mdi:package-variant-remove" class="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-white" />
+                    <Icon name="mdi:package-variant-closed-remove" class="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-white" />
                   </div>
+
+                  <!-- Enhanced floating particles - Responsive -->
+                  <div class="absolute -top-3 sm:-top-5 -right-3 sm:-right-5 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full animate-bounce shadow-lg"></div>
+                  <div class="absolute -bottom-5 sm:-bottom-7 -left-5 sm:-left-7 w-3 h-3 sm:w-5 sm:h-5 bg-gradient-to-br from-pink-400 to-red-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 0.5s"></div>
+                  <div class="absolute top-1 sm:top-2 left-10 sm:left-14 lg:left-16 w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 1s"></div>
+                  <div class="absolute -top-1 sm:-top-3 left-5 sm:left-7 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full animate-bounce shadow-lg" style="animation-delay: 1.5s"></div>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Enhanced error message content - Responsive -->
           <div class="space-y-6 sm:space-y-8">
+            <!-- Main heading -->
+            <div class="space-y-3 sm:space-y-5">
+              <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
+                Oops! Product Lost in Space
+              </h1>
+              <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto font-medium">
+                The product you're searching for has taken an unexpected journey into the digital cosmos. Let's help you navigate back to amazing deals!
+              </p>
+            </div>
+
+            <!-- Enhanced helpful suggestions - Responsive -->
             <div class="bg-gradient-to-br from-white/80 via-gray-50/80 to-white/80 dark:from-gray-800/80 dark:via-gray-700/80 dark:to-gray-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-lg sm:shadow-xl border border-gray-200/50 dark:border-gray-600/50">
+              <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-6 sm:mb-8">What would you like to do?</h3>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <UButton
-                  to="/"
-                  icon="i-heroicons-home"
-                  size="lg"
-                  variant="solid"
-                  class="w-full"
+                <!-- Enhanced go back button - Responsive -->
+                <button 
+                  @click="$router.go(-1)"
+                  class="group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
                 >
+                  <Icon name="mdi:arrow-left-circle" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:-translate-x-1 sm:group-hover:-translate-x-2 group-hover:scale-110" />
                   <div class="text-left">
-                    <span class="font-black text-base sm:text-lg lg:text-xl block">Go Home</span>
-                    <span class="text-xs sm:text-sm opacity-90">Back to homepage</span>
+                    <span class="font-black text-base sm:text-lg lg:text-xl block">Go Back</span>
+                    <span class="text-xs sm:text-sm opacity-90">Return to previous page</span>
                   </div>
-                </UButton>
+                </button>
+
+                <!-- Enhanced browse all products - Responsive -->
+                <NuxtLink 
+                  to="/"
+                  class="group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
+                >
+                  <Icon name="mdi:view-grid-plus" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                  <div class="text-left">
+                    <span class="font-black text-base sm:text-lg lg:text-xl block">Browse Products</span>
+                    <span class="text-xs sm:text-sm opacity-90">Discover amazing deals</span>
+                  </div>
+                </NuxtLink>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <Transition name="fade">
+      <button
+        v-if="showScrollTop"
+        @click="scrollToTop"
+        class="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
+      >
+        <Icon name="mdi:arrow-up" class="w-6 h-6 mx-auto" />
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -207,16 +274,24 @@ import type { Product } from '~/types/products';
 import { useCartStore } from '~/store/cartStore';
 
 const isLoading = ref(true);
-const products = ref<Product[] | null>(null);
+const isLoadingMore = ref(false);
+const products = ref<Product[]>([]);
 const config = useRuntimeConfig();
 
 // Pagination
 const page = ref(1);
 const pageSize = ref(12);
-const totalItems = ref(0);
+const hasReachedEnd = ref(false);
+const showScrollTop = ref(false);
+const imageErrors = ref<Record<string, boolean>>({});
 
-// Debounced search
-let searchTimeout: NodeJS.Timeout;
+const handleImageError = (productSlug: string) => {
+  imageErrors.value[productSlug] = true;
+};
+
+const handleImageLoad = (productSlug: string) => {
+  imageErrors.value[productSlug] = false;
+};
 
 const addToCart = (product: Product) => {
   const cart = useCartStore();
@@ -238,48 +313,87 @@ const getStarWidth = (starIndex: number, rating: number) => {
   }
 };
 
-watch(page, async () => {
-  await fetchProducts();
-});
-
-const fetchProducts = async () => {
+const fetchProducts = async (pageNum: number = 1, append: boolean = false) => {
   try {
-    isLoading.value = true;
+    if (pageNum === 1) {
+      isLoading.value = true;
+    } else {
+      isLoadingMore.value = true;
+    }
 
-    const response = await useApi<Product[]>(`/products?hideSoldOut=true`, {
+    const response = await useApi<Product[]>(`/products?limit=${pageSize.value}&page=${page.value}&order=scaleRating&direction=desc&hideSoldOut=true`, {
       method: 'GET',
     });
     
-    products.value = response;
+    if (response.length === 0) {
+      hasReachedEnd.value = true;
+      return;
+    }
+
+    if (append) {
+      products.value = [...products.value, ...response];
+    } else {
+      products.value = response;
+    }
+
+    // Check if we got fewer products than requested (last page)
+    if (response.length < pageSize.value) {
+      hasReachedEnd.value = true;
+    }
   } catch (err) {
     console.error('Failed to fetch products:', err);
-    products.value = [];
+    if (!append) {
+      products.value = [];
+    }
   } finally {
     isLoading.value = false;
+    isLoadingMore.value = false;
   }
 };
 
-const fetchTotalCount = async () => {
-  try {
-    const params = new URLSearchParams({
-      hideSoldOut: 'true'
-    });
+const loadMore = async () => {
+  if (isLoadingMore.value || hasReachedEnd.value) return;
+  
+  page.value++;
+  await fetchProducts(page.value, true);
+};
 
-    const countResponse = await useApi<Product[]>(`/products?${params}`, {
-      method: 'GET',
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
+// Scroll event handler
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 500;
+  
+  // Check if user is near bottom of page for infinite scroll
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const windowHeight = window.innerHeight;
+  const docHeight = document.documentElement.offsetHeight;
+  
+  if (scrollTop + windowHeight >= docHeight - 200 && !isLoadingMore.value && !hasReachedEnd.value) {
+    loadMore();
+  }
+};
+
+// Setup scroll listeners
+const setupScrollListeners = () => {
+  if (process.client) {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Cleanup
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll);
     });
-    totalItems.value = countResponse.length;
-  } catch (err) {
-    console.error('Failed to fetch total count:', err);
-    totalItems.value = 0;
   }
 };
 
 onMounted(async () => {
-  await Promise.all([
-    fetchProducts(),
-    fetchTotalCount()
-  ]);
+  await fetchProducts(1, false);
+  setupScrollListeners();
 });
 </script>
 
@@ -297,5 +411,15 @@ onMounted(async () => {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

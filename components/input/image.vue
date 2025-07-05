@@ -69,15 +69,25 @@
         <div v-else class="p-4">
           <div class="flex justify-center">
             <div class="relative inline-block group">
-              <!-- Image Preview -->
+              <!-- Image Error/Placeholder -->
               <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                <div v-if="imageError || !preview" class="w-64 h-64 flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700">
+                  <div class="text-center">
+                    <Icon name="mdi:image-off-outline" class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                    <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Image Failed to Load</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Click replace to try again</p>
+                  </div>
+                </div>
                 <img 
+                  v-else
                   :src="preview" 
                   :alt="fileName || 'Preview'" 
                   class="max-w-full max-h-64 transition-all duration-300 group-hover:scale-105"
+                  @error="handleImageError"
+                  @load="handleImageLoad"
                 />
                 
-                <!-- Action Buttons Overlay -->
+                <!-- Action Buttons Overlay for Successful Load -->
                 <div class="absolute inset-0 bg-black/20 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                   <button
                     type="button"
@@ -115,13 +125,14 @@
           <div v-if="fileName" class="mt-3 text-center">
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
               {{ fileName }}
+              <span v-if="imageError" class="text-red-500 text-xs ml-2">(Failed to load)</span>
             </p>
             <div class="flex items-center justify-center gap-2 mt-1">
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 {{ formatFileSize(fileSize) }}
               </p>
-              <span v-if="imageDimensions" class="text-xs text-gray-400 dark:text-gray-500">•</span>
-              <p v-if="imageDimensions" class="text-xs text-gray-500 dark:text-gray-400">
+              <span v-if="imageDimensions && !imageError" class="text-xs text-gray-400 dark:text-gray-500">•</span>
+              <p v-if="imageDimensions && !imageError" class="text-xs text-gray-500 dark:text-gray-400">
                 {{ imageDimensions }}
               </p>
             </div>
@@ -229,6 +240,7 @@ const preview = ref<string | null>(props.preview)
 const fileName = ref<string>('')
 const fileSize = ref<number>(0)
 const imageDimensions = ref<string>('')
+const imageError = ref<boolean>(false)
 
 const hasContent = computed(() => !!preview.value)
 
@@ -318,6 +330,14 @@ function getImageDimensions(file: File): Promise<string> {
   })
 }
 
+function handleImageError() {
+  imageError.value = true
+}
+
+function handleImageLoad() {
+  imageError.value = false
+}
+
 async function processFile(file: File) {
   // Validate file type
   if (!props.allowedTypes.includes(file.type)) {
@@ -346,6 +366,9 @@ async function processFile(file: File) {
     URL.revokeObjectURL(preview.value)
   }
   
+  // Reset image error state
+  imageError.value = false
+  
   // Create new preview
   preview.value = URL.createObjectURL(file)
   fileName.value = file.name
@@ -368,6 +391,7 @@ function removeImage() {
   fileName.value = ''
   fileSize.value = 0
   imageDimensions.value = ''
+  imageError.value = false
   
   // Clear file inputs
   clearFileInputs()
@@ -442,6 +466,7 @@ watch(() => props.modelValue, async (file) => {
     fileName.value = file.name
     fileSize.value = file.size
     imageDimensions.value = await getImageDimensions(file)
+    imageError.value = false
   } else {
     // If modelValue is null, clear everything
     if (preview.value && preview.value.startsWith('blob:')) {
@@ -451,6 +476,7 @@ watch(() => props.modelValue, async (file) => {
     fileName.value = ''
     fileSize.value = 0
     imageDimensions.value = ''
+    imageError.value = false
   }
 })
 
@@ -461,6 +487,7 @@ watch(() => props.preview, (newPreview) => {
     fileName.value = ''
     fileSize.value = 0
     imageDimensions.value = ''
+    imageError.value = false
   }
 })
 

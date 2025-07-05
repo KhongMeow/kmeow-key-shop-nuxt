@@ -93,10 +93,21 @@
   const data = ref<SlideShow[] | null>(null);
   let isLoading = ref(true);
   const error = ref<string | null>(null);
+  // Add imageErrors ref to track failed images
+  const imageErrors = ref<Record<string, boolean>>({});
 
   const canCreate = authStore.checkPermission('create-slide-show')
   const canEdit = authStore.checkPermission('update-slide-show')
   const canDelete = authStore.checkPermission('delete-slide-show')
+
+  // Add image error and load handlers
+  const handleImageError = (slideSlug: string) => {
+    imageErrors.value[slideSlug] = true;
+  };
+
+  const handleImageLoad = (slideSlug: string) => {
+    imageErrors.value[slideSlug] = false;
+  };
 
   onMounted(async () => {
     await getSlidesShow();
@@ -216,7 +227,39 @@
   }, {
     accessorKey: 'image',
     header: 'Image',
-    cell: ({ row }) => h('img', { src: useGetImageUrl(row.getValue('image')), alt: row.getValue('title'), class: 'w-16 h-16 object-cover' })
+    cell: ({ row }) => {
+      return h('div', { class: 'relative w-16 h-16' }, [
+        // Show placeholder if no image or image error
+        (!row.getValue('image') || imageErrors.value[row.original.slug]) ? 
+          h('div', { 
+            class: 'w-16 h-16 flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-lg'
+          }, [
+            h('div', { class: 'text-center' }, [
+              h('svg', {
+                class: 'w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-1',
+                fill: 'none',
+                stroke: 'currentColor',
+                viewBox: '0 0 24 24'
+              }, [
+                h('path', {
+                  'stroke-linecap': 'round',
+                  'stroke-linejoin': 'round',
+                  'stroke-width': '2',
+                  d: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+                })
+              ]),
+              h('span', { class: 'text-xs text-gray-500 dark:text-gray-400' }, 'No Image')
+            ])
+          ]) :
+          h('img', { 
+            src: useGetImageUrl(row.getValue('image')), 
+            alt: row.getValue('title'), 
+            class: 'w-16 h-16 object-cover rounded-lg',
+            onError: () => handleImageError(row.original.slug),
+            onLoad: () => handleImageLoad(row.original.slug)
+          })
+      ])
+    }
   }, {
     accessorKey: 'actions',
     header: 'Actions',
