@@ -63,10 +63,24 @@
                 <!-- Shimmer Effect -->
                 <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 
+                <div 
+                  v-if="!product.image || imageErrors[product.slug]"
+                  class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700"
+                >
+                  <div class="text-center">
+                    <Icon name="mdi:image-off-outline" class="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-4" />
+                    <p class="text-sm sm:text-base lg:text-lg text-gray-500 dark:text-gray-400 font-medium">No Image Available</p>
+                  </div>
+                </div>
+                
+                <!-- Product Image -->
                 <img 
+                  v-else
                   :src="getImageUrl(product.image)" 
                   :alt="product.name"
                   class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000"
+                  @error="handleImageError(product.slug)"
+                  @load="handleImageLoad(product.slug)"
                 />
                 
                 <!-- Enhanced Out of Stock Overlay -->
@@ -673,6 +687,16 @@ const decreaseQuantity = () => {
   if (quantity.value > 1) {
     quantity.value--;
   }
+};
+
+const imageErrors = ref<Record<string, boolean>>({});
+
+const handleImageError = (productSlug: string) => {
+  imageErrors.value[productSlug] = true;
+};
+
+const handleImageLoad = (productSlug: string) => {
+  imageErrors.value[productSlug] = false;
 };
 
 const addToCart = () => {

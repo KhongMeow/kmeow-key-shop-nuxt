@@ -2,6 +2,7 @@
   <div class="group relative mb-4">
     <!-- Floating Label -->
     <label 
+      v-if="label"
       :for="id" 
       :class="labelClasses"
     >

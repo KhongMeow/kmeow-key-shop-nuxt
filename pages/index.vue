@@ -10,7 +10,7 @@
         
         <!-- Carousel -->
         <div v-else-if="slidesShow?.length" class="relative group">
-          <div class="max-w-4xl mx-auto text-center pb-2">
+          <div class="max-w-4xl mx-auto text-center">
             <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-slate-800 dark:text-white mb-4 sm:mb-6 leading-tight sm:leading-tight md:leading-tight lg:leading-tight px-2 sm:px-0">
               Welcome to <span class="bg-gradient-to-r from-blue-500 to-yellow-600 bg-clip-text text-transparent block sm:inline mt-1 sm:mt-0">K'meow Key Shop</span>
             </h1>
@@ -45,11 +45,147 @@
 
     <!-- Welcome Section -->
     <div class="container mx-auto px-4 py-12">
-      <div class="max-w-4xl mx-auto text-center">
-        <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+      <div class="max-w-8xl mx-auto text-center">
+        <!-- <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
           Discover amazing deals on premium software keys and digital products. 
           Your trusted marketplace for authentic licenses and digital downloads.
-        </p>
+        </p> -->
+        <div class="text-center mb-16 animate-fade-in-up">
+          <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-full mb-6 border border-blue-200 dark:border-blue-800">
+            <span class="text-sm font-medium text-blue-700 dark:text-blue-300">🔥 Top Rated Products</span>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+            Featured Products
+          </h2>
+          <p class="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            Discover our best-selling software keys and digital products
+          </p>
+        </div>
+      </div>
+      
+      <div class="max-w-8xl mx-auto">
+        <div v-if="products && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
+          <div 
+            v-for="product in products"
+            :key="product.slug"
+            class="group relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-gray-100 dark:border-gray-700"
+          >
+            <!-- Sold Out Overlay -->
+            <div v-if="product?.stock === 0" class="absolute z-20 inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center rounded-3xl">
+              <div class="text-center">
+                <Icon name="mdi:package-variant-closed" class="w-16 h-16 text-red-400 mx-auto mb-2" />
+                <p class="text-white text-xl font-bold">Sold Out</p>
+              </div>
+            </div>
+
+            <!-- Product Image -->
+            <div class="relative aspect-square overflow-hidden">
+              <div 
+                v-if="!product?.image || imageErrors[product.slug]"
+                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700"
+              >
+                <div class="text-center">
+                  <Icon name="mdi:image-off-outline" class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                  <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">No Image Available</p>
+                </div>
+              </div>
+              
+              <!-- Product Image -->
+              <img 
+                v-else
+                :src="useGetImageUrl(product.image)" 
+                :alt="product?.name"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                @error="handleImageError(product.slug)"
+                @load="handleImageLoad(product.slug)"
+              >
+              
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <!-- Action Buttons -->
+              <div class="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <button 
+                  @click="addToCart(product)"
+                  class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-violet-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
+                  :disabled="product?.stock === 0"
+                >
+                  <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
+                </button>
+                <NuxtLink 
+                  :to="`/products/${product?.category.slug}/${product.slug}`"
+                  class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
+                >
+                  <Icon name="mdi:eye" class="w-6 h-6" />
+                </NuxtLink>
+              </div>
+
+              <!-- Stock Badge -->
+              <div v-if="product?.stock > 0" class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                {{ product.stock }} in stock
+              </div>
+
+              <!-- Category Badge -->
+              <div class="absolute top-4 left-4 bg-violet-500 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
+                {{ product.category?.name }}
+              </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="p-6">
+              <NuxtLink 
+                :to="`/products/${product?.category.slug}/${product?.slug}`"
+                class="block group/title"
+              >
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">
+                  {{ product?.name }}
+                </h3>
+              </NuxtLink>
+              
+              <!-- Rating -->
+              <div class="flex items-center gap-2 mb-4">
+                <div class="flex items-center">
+                  <div 
+                    v-for="star in 5" 
+                    :key="star"
+                    class="relative w-4 h-4"
+                  >
+                    <Icon 
+                      name="mdi:star" 
+                      class="absolute w-4 h-4 text-gray-300 dark:text-gray-600"
+                    />
+                    <div 
+                      class="absolute overflow-hidden"
+                      :style="{ width: getStarWidth(star, product?.scaleRating || 0) }"
+                    >
+                      <Icon 
+                        name="mdi:star" 
+                        class="w-4 h-4 text-yellow-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  ({{ product?.scaleRating}})
+                </span>
+              </div>
+
+              <!-- Price -->
+              <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                  ${{ product?.price }}
+                </div>
+                <button 
+                  @click="addToCart(product)"
+                  class="bg-gradient-to-r from-violet-500 to-purple-500 text-white px-4 py-2 rounded-xl hover:from-violet-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg font-medium"
+                  :disabled="product?.stock === 0"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -118,6 +254,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useCartStore } from '~/store/cartStore';
+import type { Product } from '~/types/products';
 import type { SlideShow } from '~/types/slides-show';
 
 // Define Category type (adjust based on your API structure)
@@ -136,25 +274,26 @@ useSeoMeta({
   description: 'Your trusted marketplace for authentic software licenses and digital downloads. Get instant delivery and 24/7 support.',
   ogTitle: "K'eow Key Shop - Premium Software Keys & Digital Products",
   ogDescription: 'Your trusted marketplace for authentic software licenses and digital downloads.',
-  ogImage: '/og-image.jpg',
-  twitterCard: 'summary_large_image'
 });
 
 const slidesShow = ref<SlideShow[] | undefined>(undefined);
 const categories = ref<Category[] | undefined>(undefined);
+const products = ref<Product[] | undefined>(undefined);
 const pending = ref(true);
 const categoriesPending = ref(true);
 
 onMounted(async () => {
   try {
     // Fetch slides and categories in parallel
-    const [slidesResponse, categoriesResponse] = await Promise.all([
+    const [slidesResponse, categoriesResponse, productsResponse] = await Promise.all([
       useApi<SlideShow[]>(`/slides-show`, { method: 'GET' }),
-      useApi<Category[]>(`/categories`, { method: 'GET' })
+      useApi<Category[]>(`/categories`, { method: 'GET' }),
+      useApi<Product[]>(`/products?limit=12&order=scaleRating&direction=desc&hideSoldOut=true`, { method: 'GET' })
     ]);
     
     slidesShow.value = slidesResponse;
     categories.value = categoriesResponse;
+    products.value = productsResponse;
   } catch (error) {
     console.error('Failed to fetch data:', error);
   } finally {
@@ -162,6 +301,31 @@ onMounted(async () => {
     categoriesPending.value = false;
   }
 });
+
+const imageErrors = ref<Record<string, boolean>>({});
+
+const handleImageError = (productSlug: string) => {
+  imageErrors.value[productSlug] = true;
+};
+
+const handleImageLoad = (productSlug: string) => {
+  imageErrors.value[productSlug] = false;
+};
+
+const addToCart = (product: Product) => {
+  const cart = useCartStore();
+  cart.addToCart(product.slug, 1);
+};
+
+const getStarWidth = (starIndex: number, rating: number) => {
+  if (rating >= starIndex) {
+    return '100%';
+  } else if (rating > starIndex - 1) {
+    return `${(rating - (starIndex - 1)) * 100}%`;
+  } else {
+    return '0%';
+  }
+};
 </script>
 
 <style scoped>

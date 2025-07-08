@@ -65,7 +65,7 @@
             <!-- Product Image -->
             <img 
               v-else
-              :src="getImageUrl(product.image)" 
+              :src="useGetImageUrl(product.image)" 
               :alt="product?.name"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               @error="handleImageError(product.slug)"
@@ -298,11 +298,6 @@ const addToCart = (product: Product) => {
   // Add success feedback
   // You can add a toast notification here
 };
-
-function getImageUrl(image: string | undefined) {
-  if (!image) return '';
-  return config.public.API_BASE_URL + image;
-}
 
 const getStarWidth = (starIndex: number, rating: number) => {
   if (rating >= starIndex) {

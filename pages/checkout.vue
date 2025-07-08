@@ -32,7 +32,26 @@
           </div>
           <div v-for="item in carts" :key="item.product.id" class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
             <div class="flex items-center gap-4 w-full">
-              <img :src="useGetImageUrl(item.product.image)" alt="Product Image" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
+              <!-- Product Image with fallback -->
+              <div class="relative w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <!-- Default placeholder when no image or image fails -->
+                <div 
+                  v-if="!item.product.image || imageErrors[item.product.slug]"
+                  class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700"
+                >
+                  <Icon name="mdi:image-off-outline" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                </div>
+                
+                <!-- Product Image -->
+                <img 
+                  v-else
+                  :src="useGetImageUrl(item.product.image)" 
+                  alt="Product Image" 
+                  class="w-full h-full object-cover"
+                  @error="handleImageError(item.product.slug)"
+                  @load="handleImageLoad(item.product.slug)"
+                />
+              </div>
               <div class="flex-1">
                 <p class="truncate text-gray-800 dark:text-white font-medium">{{ item.product.name }}</p>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">$ {{ item.product.price }}</p>
@@ -69,6 +88,7 @@
   const cartStore = useCartStore()
   const carts = ref<CartItem[] | undefined>(undefined);
   const email = ref<string>('');
+  const imageErrors = ref<Record<string, boolean>>({});
   const errors = reactive({
     email: '',
   });
@@ -76,6 +96,14 @@
   definePageMeta({
     middleware: ['auth'],
   })
+
+  const handleImageError = (productSlug: string) => {
+    imageErrors.value[productSlug] = true;
+  };
+
+  const handleImageLoad = (productSlug: string) => {
+    imageErrors.value[productSlug] = false;
+  };
 
   onMounted(async () => {
     carts.value = await cartStore.getAllItems();

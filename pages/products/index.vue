@@ -34,6 +34,75 @@
         </p>
       </div>
 
+      <!-- Category Filter -->
+      <div class="mb-8 px-4 sm:px-0">
+        <!-- Mobile horizontal scroll view -->
+        <div class="sm:hidden">
+          <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+            <button
+              @click="filterByCategory(null)"
+              :class="[
+                'flex-shrink-0 px-4 py-2.5 rounded-full font-medium transition-all duration-300 text-sm whitespace-nowrap',
+                selectedCategory === null
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+              ]"
+            >
+              All Categories
+            </button>
+            <button
+              v-for="category in categories"
+              :key="category.slug"
+              @click="filterByCategory(category.slug)"
+              :class="[
+                'flex-shrink-0 px-4 py-2.5 rounded-full font-medium transition-all duration-300 text-sm whitespace-nowrap',
+                selectedCategory === category.slug
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+              ]"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+          <!-- Scroll indicator for mobile -->
+          <div class="flex justify-center mt-2">
+            <div class="flex gap-1">
+              <div class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+              <div class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+              <div class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop/Tablet flex wrap view -->
+        <div class="hidden sm:flex flex-wrap justify-center gap-3 lg:gap-4">
+          <button
+            @click="filterByCategory(null)"
+            :class="[
+              'px-4 py-3 lg:px-6 lg:py-3 rounded-full font-medium transition-all duration-300 hover:scale-105 text-sm lg:text-base',
+              selectedCategory === null
+                ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg transform scale-105'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-violet-300 dark:hover:border-violet-500 hover:shadow-md'
+            ]"
+          >
+            All Categories
+          </button>
+          <button
+            v-for="category in categories"
+            :key="category.slug"
+            @click="filterByCategory(category.slug)"
+            :class="[
+              'px-4 py-3 lg:px-6 lg:py-3 rounded-full font-medium transition-all duration-300 hover:scale-105 text-sm lg:text-base',
+              selectedCategory === category.slug
+                ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg transform scale-105'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-violet-300 dark:hover:border-violet-500 hover:shadow-md'
+            ]"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+      </div>
+
       <!-- Products Grid -->
       <div v-if="products && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-16">
         <div 
@@ -64,7 +133,7 @@
             <!-- Product Image -->
             <img 
               v-else
-              :src="getImageUrl(product.image)" 
+              :src="useGetImageUrl(product.image)" 
               :alt="product?.name"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               @error="handleImageError(product.slug)"
@@ -84,7 +153,7 @@
                 <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
               </button>
               <NuxtLink 
-                :to="`/${product?.category.slug}/${product.slug}`"
+                :to="`/products/${product?.category.slug}/${product.slug}`"
                 class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
               >
                 <Icon name="mdi:eye" class="w-6 h-6" />
@@ -105,7 +174,7 @@
           <!-- Product Info -->
           <div class="p-6">
             <NuxtLink 
-              :to="`/${product?.category.slug}/${product?.slug}`"
+              :to="`/products/${product?.category.slug}/${product?.slug}`"
               class="block group/title"
             >
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">
@@ -214,10 +283,13 @@
             <!-- Main heading -->
             <div class="space-y-3 sm:space-y-5">
               <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
-                Oops! Product Lost in Space
+                {{ selectedCategory ? 'No Products in This Category' : 'Oops! Product Lost in Space' }}
               </h1>
               <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto font-medium">
-                The product you're searching for has taken an unexpected journey into the digital cosmos. Let's help you navigate back to amazing deals!
+                {{ selectedCategory 
+                  ? `No products found in the "${getSelectedCategoryName()}" category. Try exploring other categories!`
+                  : 'The product you\'re searching for has taken an unexpected journey into the digital cosmos. Let\'s help you navigate back to amazing deals!'
+                }}
               </p>
             </div>
 
@@ -250,6 +322,20 @@
                   </div>
                 </NuxtLink>
               </div>
+
+              <!-- Show all categories button when filtered -->
+              <div v-if="selectedCategory" class="mt-4 sm:mt-6">
+                <button
+                  @click="filterByCategory(null)"
+                  class="w-full group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
+                >
+                  <Icon name="mdi:view-grid" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:scale-110" />
+                  <div class="text-center">
+                    <span class="font-black text-base sm:text-lg lg:text-xl block">View All Categories</span>
+                    <span class="text-xs sm:text-sm opacity-90">See all available products</span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -273,9 +359,16 @@
 import type { Product } from '~/types/products';
 import { useCartStore } from '~/store/cartStore';
 
+interface Category {
+  slug: string;
+  name: string;
+}
+
 const isLoading = ref(true);
 const isLoadingMore = ref(false);
 const products = ref<Product[]>([]);
+const categories = ref<Category[]>([]);
+const selectedCategory = ref<string | null>(null);
 const config = useRuntimeConfig();
 
 // Pagination
@@ -298,11 +391,6 @@ const addToCart = (product: Product) => {
   cart.addToCart(product.slug, 1);
 };
 
-function getImageUrl(image: string | undefined) {
-  if (!image) return '';
-  return config.public.API_BASE_URL + image;
-}
-
 const getStarWidth = (starIndex: number, rating: number) => {
   if (rating >= starIndex) {
     return '100%';
@@ -313,6 +401,30 @@ const getStarWidth = (starIndex: number, rating: number) => {
   }
 };
 
+const getSelectedCategoryName = () => {
+  if (!selectedCategory.value) return '';
+  const category = categories.value.find(cat => cat.slug === selectedCategory.value);
+  return category?.name || '';
+};
+
+const fetchCategories = async () => {
+  try {
+    const response = await useApi<Category[]>('/categories', {
+      method: 'GET',
+    });
+    categories.value = response;
+  } catch (err) {
+    console.error('Failed to fetch categories:', err);
+  }
+};
+
+const filterByCategory = async (categorySlug: string | null) => {
+  selectedCategory.value = categorySlug;
+  page.value = 1;
+  hasReachedEnd.value = false;
+  await fetchProducts(1, false);
+};
+
 const fetchProducts = async (pageNum: number = 1, append: boolean = false) => {
   try {
     if (pageNum === 1) {
@@ -321,12 +433,21 @@ const fetchProducts = async (pageNum: number = 1, append: boolean = false) => {
       isLoadingMore.value = true;
     }
 
-    const response = await useApi<Product[]>(`/products?limit=${pageSize.value}&page=${page.value}&order=scaleRating&direction=desc&hideSoldOut=true`, {
+    let url = `/products?limit=${pageSize.value}&page=${page.value}&order=scaleRating&direction=desc&hideSoldOut=true`;
+    
+    if (selectedCategory.value) {
+      url += `&categorySlug=${selectedCategory.value}`;
+    }
+
+    const response = await useApi<Product[]>(url, {
       method: 'GET',
     });
     
     if (response.length === 0) {
       hasReachedEnd.value = true;
+      if (!append) {
+        products.value = [];
+      }
       return;
     }
 
@@ -392,7 +513,10 @@ const setupScrollListeners = () => {
 };
 
 onMounted(async () => {
-  await fetchProducts(1, false);
+  await Promise.all([
+    fetchCategories(),
+    fetchProducts(1, false)
+  ]);
   setupScrollListeners();
 });
 </script>
@@ -421,5 +545,28 @@ onMounted(async () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Hide scrollbar for mobile category filter */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Smooth scrolling for mobile categories */
+.scrollbar-hide {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Enhanced mobile responsive styles */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

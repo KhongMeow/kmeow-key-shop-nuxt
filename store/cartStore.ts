@@ -9,6 +9,7 @@ export const useCartStore = defineStore('cart', () => {
   const cartItems = ref<OrderItem[]>([]);
   const order = ref<Order | null>(null);
   const isLoading = ref<boolean>(false);
+  const justAddedToCart = ref<boolean>(false);
 
   // Load cart from IndexedDB on store init (client-side only)
   if (process.client) {
@@ -38,6 +39,15 @@ export const useCartStore = defineStore('cart', () => {
         const plainCartItems = JSON.parse(JSON.stringify(cartItems.value));
         await set('cartItems', plainCartItems);
       }
+      
+      // Set flag to indicate item was just added
+      justAddedToCart.value = true;
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        justAddedToCart.value = false;
+      }, 100);
+      
     } catch (error) {
       console.error('Add to cart error:', error);
     } finally {
@@ -125,6 +135,7 @@ export const useCartStore = defineStore('cart', () => {
     cartItems,
     order,
     isLoading,
+    justAddedToCart,
     addToCart,
     getAllItems,
     updateCartItem,
