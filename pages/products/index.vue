@@ -23,9 +23,9 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else class="max-w-8xl mx-auto">
+    <div v-else-if="products" class="max-w-8xl mx-auto">
       <!-- Page Header -->
-      <div class="text-center mb-12">
+      <div class="text-center mb-4">
         <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
           All Products
         </h1>
@@ -35,7 +35,7 @@
       </div>
 
       <!-- Category Filter -->
-      <div class="mb-8 px-4 sm:px-0">
+      <div class="mb-6">
         <!-- Mobile horizontal scroll view -->
         <div class="sm:hidden">
           <div class="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
@@ -245,9 +245,9 @@
 
       <!-- Empty State -->
       <div v-if="!isLoading && (!products || products.length === 0)" class="flex justify-center items-center">
-        <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-28">
+        <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-4">
           <!-- Epic 404 Illustration - Responsive -->
-          <div class="relative mb-8 sm:mb-12">
+          <div class="relative mb-2">
             <!-- Floating background elements -->
             <div class="absolute inset-0 flex items-center justify-center">
               <div class="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-br from-indigo-200/30 via-purple-200/30 to-pink-200/30 rounded-full blur-3xl animate-pulse"></div>
@@ -282,10 +282,10 @@
           <div class="space-y-6 sm:space-y-8">
             <!-- Main heading -->
             <div class="space-y-3 sm:space-y-5">
-              <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
+              <h1 class="text-2xl sm:text-2xl lg:text-3xl xl:text-4xl font-black bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
                 {{ selectedCategory ? 'No Products in This Category' : 'Oops! Product Lost in Space' }}
               </h1>
-              <p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto font-medium">
+              <p class="text-base sm:text-md lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl mx-auto font-medium">
                 {{ selectedCategory 
                   ? `No products found in the "${getSelectedCategoryName()}" category. Try exploring other categories!`
                   : 'The product you\'re searching for has taken an unexpected journey into the digital cosmos. Let\'s help you navigate back to amazing deals!'
@@ -311,20 +311,6 @@
                 </button>
 
                 <!-- Enhanced browse all products - Responsive -->
-                <NuxtLink 
-                  to="/"
-                  class="group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
-                >
-                  <Icon name="mdi:view-grid-plus" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                  <div class="text-left">
-                    <span class="font-black text-base sm:text-lg lg:text-xl block">Browse Products</span>
-                    <span class="text-xs sm:text-sm opacity-90">Discover amazing deals</span>
-                  </div>
-                </NuxtLink>
-              </div>
-
-              <!-- Show all categories button when filtered -->
-              <div v-if="selectedCategory" class="mt-4 sm:mt-6">
                 <button
                   @click="filterByCategory(null)"
                   class="w-full group flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-102 sm:hover:scale-105 hover:shadow-lg sm:hover:shadow-xl border border-white/20"
@@ -560,13 +546,5 @@ onMounted(async () => {
 .scrollbar-hide {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Enhanced mobile responsive styles */
-@media (max-width: 640px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
 }
 </style>

@@ -29,7 +29,7 @@
         <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
           {{ category?.name }}
         </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        <p v-if="category" class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Discover our curated collection of premium products
         </p>
       </div>
@@ -173,9 +173,9 @@
     
     <!-- Empty State -->
     <div v-if="!isLoading && (!products || products.length === 0)" class="flex justify-center items-center">
-      <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-28">
+      <div class="text-center max-w-4xl mx-auto px-4 sm:px-6 mt-4">
         <!-- Epic 404 Illustration - Responsive -->
-        <div class="relative mb-8 sm:mb-12">
+        <div class="relative mb-2">
           <!-- Floating background elements -->
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 bg-gradient-to-br from-indigo-200/30 via-purple-200/30 to-pink-200/30 rounded-full blur-3xl animate-pulse"></div>

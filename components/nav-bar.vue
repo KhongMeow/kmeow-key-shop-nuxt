@@ -327,7 +327,7 @@ const navigateToProduct = (product: any) => {
   searchPopoverOpen.value = false;
   query.value = '';
   searchResults.value = [];
-  navigateTo(`/${product.category.slug}/${product.slug}`);
+  navigateTo(`/products/${product.category.slug}/${product.slug}`);
 };
 
 const user = computed(() => {
