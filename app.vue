@@ -21,7 +21,13 @@
 </template>
 
 <script setup lang="ts">
-
+  // SEO Meta
+  useSeoMeta({
+    title: "K'eow Key Shop - Premium Software Keys & Digital Products",
+    description: 'Your trusted marketplace for authentic software licenses and digital downloads. Get instant delivery and 24/7 support.',
+    ogTitle: "K'eow Key Shop - Premium Software Keys & Digital Products",
+    ogDescription: 'Your trusted marketplace for authentic software licenses and digital downloads.',
+  });
 </script>
 
 <style>

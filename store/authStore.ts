@@ -246,6 +246,27 @@ export const useAuthStore = defineStore('auth', () => {
     );
   }
 
+  async function increaseBalance(amount: number) {
+    
+    if (accessToken.value && user.value) {
+      try {
+      isChanging.value = true;
+      const response = await useApi('/balances/increase-my-amount', {
+        method: 'POST',
+        data: {
+          amount,
+        },
+      })
+      return response;
+    } catch (error) {
+      console.error('Error topping up balance:', error);
+      return null;
+    } finally {
+      isChanging.value = false;
+    }
+    }
+  }
+
   return {
     user,
     accessToken,
@@ -266,5 +287,6 @@ export const useAuthStore = defineStore('auth', () => {
     updateUser,
     changePassword,
     checkPermission,
+    increaseBalance,
   };
 });

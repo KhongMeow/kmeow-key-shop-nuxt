@@ -268,14 +268,6 @@ interface Category {
   product_count?: number;
 }
 
-// SEO Meta
-useSeoMeta({
-  title: "K'eow Key Shop - Premium Software Keys & Digital Products",
-  description: 'Your trusted marketplace for authentic software licenses and digital downloads. Get instant delivery and 24/7 support.',
-  ogTitle: "K'eow Key Shop - Premium Software Keys & Digital Products",
-  ogDescription: 'Your trusted marketplace for authentic software licenses and digital downloads.',
-});
-
 const slidesShow = ref<SlideShow[] | undefined>(undefined);
 const categories = ref<Category[] | undefined>(undefined);
 const products = ref<Product[] | undefined>(undefined);

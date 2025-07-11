@@ -355,7 +355,6 @@ const isLoadingMore = ref(false);
 const products = ref<Product[]>([]);
 const categories = ref<Category[]>([]);
 const selectedCategory = ref<string | null>(null);
-const config = useRuntimeConfig();
 
 // Pagination
 const page = ref(1);

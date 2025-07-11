@@ -204,7 +204,7 @@
                   Profile
                 </NuxtLink>
                 <NuxtLink 
-                  to="/balance"
+                  to="/top-up"
                   class="block text-gray-800 dark:text-gray-200 font-medium p-2 my-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   active-class="bg-gray-100 dark:bg-gray-500 text-blue-600 dark:text-blue-400"
                   exact
