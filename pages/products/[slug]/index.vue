@@ -85,7 +85,7 @@
                 <Icon name="solar:cart-plus-bold" class="w-6 h-6" />
               </button>
               <NuxtLink 
-                :to="`/${route.params.slug}/${product.slug}`"
+                :to="`/products/${route.params.slug}/${product.slug}`"
                 class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 hover:bg-purple-500 hover:text-white transition-all duration-300 hover:scale-110 shadow-lg"
               >
                 <Icon name="mdi:eye" class="w-6 h-6" />
@@ -101,7 +101,7 @@
           <!-- Product Info -->
           <div class="p-6">
             <NuxtLink 
-              :to="`/${route.params.slug}/${product?.slug}`"
+              :to="`/products/${route.params.slug}/${product?.slug}`"
               class="block group/title"
             >
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover/title:text-violet-600 dark:group-hover/title:text-violet-400 transition-colors duration-300 line-clamp-2">

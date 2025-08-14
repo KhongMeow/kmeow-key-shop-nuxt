@@ -115,7 +115,7 @@
 
   const pagination = ref({
     pageIndex: 0,
-    pageSize: 24,
+    pageSize: 25,
   })
 
   function deleteRow(slug: string) {
